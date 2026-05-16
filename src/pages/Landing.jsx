@@ -401,6 +401,7 @@ const Landing = () => {
                 <a href="#library" className="font-bold hover:text-brand-primary transition-colors text-lg">UI Library</a>
                 <a href="#backend" className="font-bold hover:text-brand-primary transition-colors text-lg">Features</a>
                 <a href="#pricing" className="font-bold hover:text-brand-primary transition-colors text-lg">Economics</a>
+                <Link to="/terms" className="font-bold hover:text-brand-primary transition-colors text-lg">Terms of Service</Link>
               </div>
               <div className="flex flex-col gap-6">
                 <span className="text-xs font-black text-brand-primary uppercase tracking-widest border-b border-brand-primary pb-2">Developers</span>
