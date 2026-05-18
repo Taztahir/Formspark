@@ -1,52 +1,56 @@
-import { useState, useEffect } from 'react';
-import { submissionsAPI } from '../services/api';
-import toast from 'react-hot-toast';
+import { useState, useEffect, useCallback } from 'react'
+import { getSubmissions, getSubmissionStats, deleteSubmission, exportCSV } from '../services/submissionsService'
 
-const useSubmissions = (token) => {
-  const [submissions, setSubmissions] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export const useSubmissions = (formId) => {
+  const [submissions, setSubmissions] = useState([])
+  const [stats, setStats] = useState({ total: 0, today: 0, spam: 0, avgPerDay: 0, chartData: [] })
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({ search: '', startDate: null, endDate: null, showSpam: false })
 
-  const fetchSubmissions = async () => {
-    if (!token) return;
-    setLoading(true);
+  const fetchAll = useCallback(async () => {
+    if (!formId) return
     try {
-      const [subRes, anaRes] = await Promise.all([
-        submissionsAPI.getSubmissions(token),
-        submissionsAPI.getAnalytics(token)
-      ]);
-      setSubmissions(subRes.data.submissions);
-      setAnalytics(anaRes.data.analytics);
+      setLoading(true)
+      const [subs, statsData] = await Promise.all([
+        getSubmissions(formId, filters),
+        getSubmissionStats(formId)
+      ])
+      setSubmissions(subs)
+      setStats(statsData)
     } catch (err) {
-      setError(err);
-      toast.error('Failed to load submissions');
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [formId, filters])
 
-  const deleteSubmission = async (id) => {
-    try {
-      await submissionsAPI.deleteSubmission(id);
-      setSubmissions(submissions.filter(s => s.id !== id));
-      toast.success('Submission deleted');
-    } catch (err) {
-      toast.error('Failed to delete submission');
-    }
-  };
+  useEffect(() => { fetchAll() }, [fetchAll])
 
-  const exportCSV = () => {
-    if (!token) return;
-    submissionsAPI.exportCSV(token);
-    toast.success('Export started');
-  };
+  const handleDelete = async (id) => {
+    await deleteSubmission(id)
+    setSubmissions(prev => prev.filter(s => s.id !== id))
+    setStats(prev => ({ ...prev, total: prev.total - 1 }))
+  }
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, [token]);
+  const handleExport = async (formName) => {
+    await exportCSV(formId, formName)
+  }
 
-  return { submissions, analytics, loading, error, fetchSubmissions, deleteSubmission, exportCSV };
-};
+  const addSubmission = (submission) => {
+    setSubmissions(prev => [submission, ...prev])
+    setStats(prev => ({ 
+      ...prev, 
+      total: prev.total + 1, 
+      today: prev.today + 1,
+      chartData: prev.chartData.map(d => {
+        const todayStr = new Date().toLocaleDateString('en', { month: 'short', day: 'numeric' })
+        if (d.date === todayStr) {
+          return { ...d, count: d.count + 1 }
+        }
+        return d
+      })
+    }))
+  }
 
-export default useSubmissions;
+  return { submissions, stats, loading, filters, setFilters, handleDelete, handleExport, addSubmission }
+}

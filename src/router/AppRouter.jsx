@@ -12,6 +12,7 @@ import TermsOfService from '../pages/TermsOfService';
 import ApiKeys from '../pages/ApiKeys';
 import Team from '../pages/Team';
 import Forms from '../pages/Forms';
+import Contact from '../pages/Contact';
 import NotFound from '../pages/NotFound';
 import ProtectedRoute from './ProtectedRoute';
 import ScrollReset from '../components/ui/ScrollReset';
@@ -27,6 +28,7 @@ const AnimatedRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/library" element={<Library />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<TermsOfService />} />
 
         {/* Protected Dashboard Routes */}

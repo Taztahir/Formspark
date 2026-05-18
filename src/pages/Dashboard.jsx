@@ -1,287 +1,649 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { useForms } from '../hooks/useForms';
 import useAuth from '../hooks/useAuth';
-import { formsService } from '../services/formsService';
-import { submissionsService } from '../services/submissionsService';
-import toast from 'react-hot-toast';
 import Sidebar from '../components/layout/Sidebar';
+import toast from 'react-hot-toast';
 
-// Safe SVG Icons
+// Custom tab title hook
+const useDocumentTitle = (title) => {
+  useEffect(() => {
+    document.title = `${title} — FormSpark`;
+  }, [title]);
+};
+
+// Safe SVGs
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+);
+
 const PlusIcon = () => (
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
 );
 
-const FormIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M7 7h10M7 12h10M7 17h10"/></svg>
+const CopyIcon = () => (
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
 );
 
-const SubmissionIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+const TrashIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
 );
 
-const IntegrationIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="M12 8v8M8 12h8"/></svg>
+const SettingsIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 );
 
-const KeyIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3L15.5 7.5z"/></svg>
+const EyeIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+);
+
+const CodeIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+);
+
+const AlertIcon = () => (
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12" y1="17" y2="17"/></svg>
 );
 
 const Dashboard = () => {
+  useDocumentTitle('Dashboard');
   const { user } = useAuth();
-  const [forms, setForms] = useState([]);
-  const [stats, setStats] = useState({ totalForms: 0, totalSubmissions: 0, integrations: 8, apiKeys: 5 });
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [newFormName, setNewFormName] = useState('');
+  const navigate = useNavigate();
 
+  const { forms, loading, error, handleCreate, handleDelete } = useForms();
+
+  const [search, setSearch] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Modals data state
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [formNameInput, setFormNameInput] = useState('');
+  const [notificationEmail, setNotificationEmail] = useState('');
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [spamProtection, setSpamProtection] = useState(true);
+
+  const [embedTab, setEmbedTab] = useState('script'); // 'script' or 'react'
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  // Prefill email once user loads
   useEffect(() => {
-    fetchDashboardData();
+    if (user?.email) {
+      setNotificationEmail(user.email);
+    }
+  }, [user]);
+
+  // Handle ESC key for closing modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowCreateModal(false);
+        setShowEmbedModal(false);
+        setShowDeleteModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const fetchDashboardData = async () => {
+  const handleOpenCreateModal = () => {
+    setFormNameInput('');
+    setNotificationEmail(user?.email || '');
+    setEmailNotifications(true);
+    setSpamProtection(true);
+    setShowCreateModal(true);
+  };
+
+  const handleFormCreateSubmit = async (e) => {
+    e.preventDefault();
+    if (formNameInput.length < 3) {
+      toast.error('Form name must be at least 3 characters');
+      return;
+    }
+    setSubmitting(true);
     try {
-      setLoading(true);
-      const formsData = await formsService.getForms();
-      setForms(formsData);
+      const newForm = await handleCreate({
+        name: formNameInput,
+        notification_email: notificationEmail,
+        email_notifications: emailNotifications,
+        spam_protection: spamProtection,
+      });
+      toast.success('Form created successfully!');
+      setShowCreateModal(false);
       
-      // Calculate total submissions across all forms
-      // This is a placeholder logic as real stats would need more queries
-      setStats(prev => ({ ...prev, totalForms: formsData.length }));
+      // Auto open embed modal for the newly created form
+      setSelectedForm(newForm);
+      setShowEmbedModal(true);
     } catch (err) {
-      toast.error('Failed to load dashboard data');
+      toast.error(err.message || 'Failed to create form');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const handleCreateForm = async (e) => {
+  const copyToClipboard = (text, message = 'Copied to clipboard!') => {
+    navigator.clipboard.writeText(text);
+    toast.success(message);
+  };
+
+  const handleOpenDeleteModal = (form) => {
+    setSelectedForm(form);
+    setDeleteConfirmName('');
+    setShowDeleteModal(true);
+  };
+
+  const handleFormDeleteSubmit = async (e) => {
     e.preventDefault();
-    if (!newFormName) return;
-    
+    if (deleteConfirmName !== selectedForm.name) {
+      toast.error('Form name does not match');
+      return;
+    }
+    setSubmitting(true);
     try {
-      await formsService.createForm(newFormName);
-      toast.success('Form created successfully');
-      setNewFormName('');
-      setShowModal(false);
-      fetchDashboardData();
+      await handleDelete(selectedForm.token);
+      toast.success('Form deleted successfully');
+      setShowDeleteModal(false);
     } catch (err) {
-      toast.error('Failed to create form');
+      toast.error(err.message || 'Failed to delete form');
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  const filteredForms = forms.filter((f) =>
+    f.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="flex h-screen bg-[#F5F5F5] font-sans overflow-hidden">
       <Sidebar />
-      
+
       <main className="flex-1 flex flex-col overflow-y-auto">
         {/* Header */}
         <header className="h-20 bg-white border-b border-black/5 flex items-center justify-between px-10 shrink-0">
-          <div className="flex gap-8">
-            <span className="text-[11px] font-black uppercase tracking-widest text-brand-primary border-b-2 border-brand-primary pb-7">Overview</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-black/40 hover:text-black transition-colors cursor-pointer pb-7">Forms</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-black/40 hover:text-black transition-colors cursor-pointer pb-7">Submissions</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-black/40 hover:text-black transition-colors cursor-pointer pb-7">Integrations</span>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-black uppercase tracking-tight text-brand-text">My Forms</h1>
           </div>
-          
+
           <div className="flex items-center gap-6">
-            <button className="relative text-black/60 hover:text-black transition-colors">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white">3</span>
-            </button>
             <div className="flex items-center gap-3 pl-6 border-l border-black/5">
               <div className="text-right">
-                <p className="text-[11px] font-black uppercase tracking-tight">{user?.user_metadata?.name || 'User'}</p>
+                <p className="text-[11px] font-black uppercase tracking-tight">{user?.user_metadata?.name || 'Developer'}</p>
                 <p className="text-[10px] font-bold text-black/40 lowercase">{user?.email}</p>
               </div>
-              <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-black text-xs">
-                {user?.user_metadata?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
+              <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-black text-xs border border-brand-border">
+                {user?.user_metadata?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Content */}
+        {/* Dashboard Content */}
         <div className="p-10 flex-1">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter">Dashboard</h1>
-              <p className="text-[13px] font-bold text-black/50 mt-1">Welcome back! Here's what's happening with your forms.</p>
+          {/* Action Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+            {/* Search */}
+            <div className="relative w-full sm:max-w-xs">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-black/40">
+                <SearchIcon />
+              </span>
+              <input
+                type="text"
+                placeholder="Search forms..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-white border-2 border-black/5 px-10 py-2.5 text-xs font-bold outline-none focus:border-brand-primary transition-colors placeholder-black/35"
+              />
             </div>
-            <button 
-              onClick={() => setShowModal(true)}
-              className="bg-black text-white px-6 py-3 font-black uppercase tracking-widest text-[11px] flex items-center gap-2 hover:bg-brand-primary transition-colors active:scale-95"
-            >
-              <PlusIcon />
-              New Form
-            </button>
+
+            {/* Buttons */}
+            <div className="flex items-center gap-3">
+              <Link
+                to="/library"
+                className="px-5 py-2.5 border-2 border-black text-brand-text font-black uppercase tracking-widest text-[10px] hover:bg-black/5 transition-colors text-center shrink-0"
+              >
+                Browse Templates
+              </Link>
+              <button
+                onClick={handleOpenCreateModal}
+                className="bg-brand-primary text-brand-text border-2 border-brand-border px-5 py-2.5 font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:bg-[#e67c00] transition-colors shadow-[4px_4px_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none shrink-0"
+              >
+                <PlusIcon />
+                Create New Form
+              </button>
+            </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard title="Total Forms" value={stats.totalForms} change="+12%" icon={<FormIcon />} color="text-orange-500" />
-            <StatCard title="Total Submissions" value={stats.totalSubmissions} change="+18%" icon={<SubmissionIcon />} color="text-blue-500" />
-            <StatCard title="Integrations" value={stats.integrations} change="No change" icon={<IntegrationIcon />} color="text-purple-500" />
-            <StatCard title="API Keys" value={stats.apiKeys} change="+25%" icon={<KeyIcon />} color="text-green-500" />
-          </div>
+          {/* Error handling */}
+          {error && (
+            <div className="bg-red-50 border-2 border-red-500 p-6 mb-8 text-red-700 flex flex-col gap-4">
+              <p className="font-bold text-sm">Error: {error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="self-start px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Chart Area */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white border border-black/5 p-8 h-[400px]">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest">Submissions Over Time</h3>
-                  <select className="bg-[#F5F5F5] border-none text-[10px] font-black uppercase px-3 py-1 outline-none">
-                    <option>Last 30 days</option>
-                  </select>
+          {/* Loading Skeleton */}
+          {loading && !error && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,0.05)] animate-pulse space-y-6">
+                  <div className="h-6 bg-black/10 w-2/3"></div>
+                  <div className="h-4 bg-black/5 w-1/2"></div>
+                  <div className="pt-6 border-t border-black/5 flex justify-between">
+                    <div className="h-8 bg-black/10 w-24"></div>
+                    <div className="h-8 bg-black/10 w-24"></div>
+                  </div>
                 </div>
-                <div className="w-full h-[280px] flex items-end gap-2 px-2">
-                  {[40, 60, 45, 70, 85, 60, 75, 90, 65, 80, 55, 70].map((h, i) => (
-                    <div key={i} className="flex-1 bg-brand-primary/10 relative group">
-                      <div className="absolute bottom-0 left-0 right-0 bg-brand-primary group-hover:bg-black transition-colors" style={{ height: `${h}%` }}></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between mt-4 px-2">
-                  <span className="text-[10px] font-bold text-black/30 uppercase">May 5</span>
-                  <span className="text-[10px] font-bold text-black/30 uppercase">May 19</span>
-                  <span className="text-[10px] font-bold text-black/30 uppercase">Jun 2</span>
-                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && filteredForms.length === 0 && (
+            <div className="bg-white border-4 border-black p-16 text-center max-w-2xl mx-auto my-12 shadow-[12px_12px_0_rgba(0,0,0,1)]">
+              <div className="w-20 h-20 bg-brand-primary/10 border-2 border-dashed border-brand-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--color-brand-primary)" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               </div>
+              <h2 className="text-2xl font-black uppercase tracking-tight mb-2">No Forms Found</h2>
+              <p className="text-xs font-bold text-black/50 max-w-md mx-auto mb-8 leading-relaxed">
+                {search ? "No forms match your search query. Try another keyword!" : "Create your first form and start collecting submissions in minutes without writing backend code."}
+              </p>
+              {!search && (
+                <button
+                  onClick={handleOpenCreateModal}
+                  className="bg-brand-primary text-brand-text border-2 border-brand-border px-6 py-3 font-black uppercase tracking-widest text-xs hover:bg-[#e67c00] transition-colors shadow-[6px_6px_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                >
+                  Create Your First Form
+                </button>
+              )}
+            </div>
+          )}
 
-              {/* Top Forms */}
-              <div className="bg-white border border-black/5 p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest">Top Forms</h3>
-                  <span className="text-[10px] font-black text-brand-primary uppercase cursor-pointer hover:underline">View all</span>
-                </div>
-                <div className="space-y-6">
-                  {forms.slice(0, 4).map((form, i) => (
-                    <div key={form.id} className="flex items-center justify-between">
-                      <span className="text-[13px] font-black uppercase">{form.name}</span>
-                      <div className="flex items-center gap-4 flex-1 max-w-[200px] ml-8">
-                        <div className="h-1.5 bg-[#F5F5F5] flex-1 rounded-full overflow-hidden">
-                          <div className="h-full bg-brand-primary" style={{ width: `${80 - i * 15}%` }}></div>
+          {/* Cards Grid */}
+          {!loading && !error && filteredForms.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {filteredForms.map((form) => {
+                const dateFormatted = new Date(form.created_at).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                });
+                const subCount = form.submissions?.[0]?.count || 0;
+
+                return (
+                  <motion.div
+                    key={form.id}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white border-4 border-black p-8 relative flex flex-col justify-between shadow-[8px_8px_0_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[10px_10px_0_rgba(0,0,0,1)] transition-all group"
+                  >
+                    <div>
+                      {/* Badge / Count Row */}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[9px] font-mono text-black/40 uppercase font-black">{dateFormatted}</span>
+                        <div className="bg-brand-primary text-brand-text border border-black px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest">
+                          {subCount} SUBMISSIONS
                         </div>
-                        <span className="text-[11px] font-black text-black/40 min-w-[30px]">{632 - i * 140}</span>
+                      </div>
+
+                      {/* Name & Token */}
+                      <h3 className="text-xl font-black uppercase tracking-tight text-brand-text group-hover:text-brand-primary transition-colors mb-2 leading-none">
+                        {form.name}
+                      </h3>
+
+                      {/* Token monospaced chip */}
+                      <div className="inline-flex items-center gap-2 bg-[#F5F5F5] border border-black/10 px-3 py-1.5 mb-8 w-full max-w-sm">
+                        <span className="font-mono text-[10px] font-bold text-black/60 truncate flex-1">{form.token}</span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(form.token, 'Token copied!')}
+                          className="text-black/45 hover:text-brand-primary transition-colors shrink-0"
+                          title="Copy Token"
+                        >
+                          <CopyIcon />
+                        </button>
                       </div>
                     </div>
-                  ))}
-                  {forms.length === 0 && (
-                    <div className="text-center py-4 text-black/30 font-bold uppercase text-xs">No forms yet</div>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* Right Side Info */}
-            <div className="space-y-6">
-              {/* Recent Submissions */}
-              <div className="bg-white border border-black/5 p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest">Recent Submissions</h3>
-                  <span className="text-[10px] font-black text-brand-primary uppercase cursor-pointer hover:underline">View all</span>
-                </div>
-                <div className="space-y-6">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <div key={i} className="flex items-center justify-between border-b border-black/5 pb-4 last:border-0 last:pb-0">
-                      <div>
-                        <p className="text-[11px] font-black uppercase">Contact Form</p>
-                        <p className="text-[10px] font-bold text-black/40">sam@acme.com</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] font-black text-black/30">JUN 2</p>
-                        <span className="text-[9px] font-black px-2 py-0.5 bg-green-100 text-green-600 rounded-full uppercase">New</span>
-                      </div>
+                    {/* Action buttons footer */}
+                    <div className="pt-6 border-t border-black/5 grid grid-cols-2 sm:flex sm:items-center gap-3">
+                      <Link
+                        to={`/dashboard/submissions/${form.token}`}
+                        className="flex-1 bg-black text-white hover:bg-brand-primary hover:text-brand-text border-2 border-black py-2.5 text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all text-center"
+                      >
+                        <EyeIcon />
+                        Data
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedForm(form);
+                          setShowEmbedModal(true);
+                        }}
+                        className="flex-1 border-2 border-black hover:bg-black hover:text-white py-2.5 text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                      >
+                        <CodeIcon />
+                        Embed
+                      </button>
+
+                      <Link
+                        to={`/dashboard/forms/${form.token}/settings`}
+                        className="flex-1 border-2 border-black hover:bg-black hover:text-white py-2.5 text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all text-center"
+                      >
+                        <SettingsIcon />
+                        Config
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDeleteModal(form)}
+                        className="flex-1 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white py-2.5 text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                      >
+                        <TrashIcon />
+                        Delete
+                      </button>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Code Snippet */}
-              <div className="bg-[#111] border border-black p-8 rounded-sm">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-primary">Quick Embed</h3>
-                  <span className="text-[10px] font-mono text-white/30">01_CODE</span>
-                </div>
-                <div className="font-mono text-[11px] space-y-1">
-                  <p className="text-brand-primary">{"<form"}</p>
-                  <p className="text-white">{"  action=\"https://formspark.io/f/id\""}</p>
-                  <p className="text-white">{"  method=\"POST\""}</p>
-                  <p className="text-brand-primary">{">"}</p>
-                  <p className="text-white">{"  <input type=\"email\" ... />"}</p>
-                  <p className="text-brand-primary">{"</form>"}</p>
-                </div>
-              </div>
+                  </motion.div>
+                );
+              })}
             </div>
-          </div>
+          )}
         </div>
       </main>
 
-      {/* New Form Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white w-full max-w-md relative z-10 p-10 border-4 border-black shadow-[12px_12px_0_rgba(0,0,0,0.1)]"
-          >
-            <h2 className="text-3xl font-black uppercase tracking-tighter mb-2">Create New Form</h2>
-            <p className="text-xs font-bold text-black/50 mb-8 uppercase tracking-widest">Give your form a memorable name.</p>
-            
-            <form onSubmit={handleCreateForm} className="space-y-6">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest block mb-2">Form Name</label>
-                <input 
-                  type="text"
-                  autoFocus
-                  required
-                  placeholder="e.g. Contact Form, Newsletter"
-                  className="w-full bg-[#F5F5F5] border-2 border-black/5 px-4 py-3 outline-none focus:border-brand-primary font-bold text-sm transition-colors"
-                  value={newFormName}
-                  onChange={(e) => setNewFormName(e.target.value)}
-                />
-              </div>
-              
-              <div className="flex gap-4 pt-4">
-                <button 
+      {/* CREATE FORM MODAL */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreateModal(false)}></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 15 }}
+              className="bg-white w-full max-w-md relative z-10 p-8 border-4 border-black shadow-[12px_12px_0_rgba(0,0,0,1)]"
+            >
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="absolute top-4 right-4 text-black/50 hover:text-black font-black text-lg transition-colors"
+              >
+                ✕
+              </button>
+
+              <h2 className="text-2xl font-black uppercase tracking-tighter mb-1">Create New Form</h2>
+              <p className="text-[10px] font-bold text-black/40 mb-6 uppercase tracking-widest">Connect any HTML frontend to start collecting data.</p>
+
+              <form onSubmit={handleFormCreateSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[9px] font-black uppercase tracking-widest block mb-1 text-black/70">Form Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Contact Form"
+                    className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs transition-colors rounded-none"
+                    value={formNameInput}
+                    onChange={(e) => setFormNameInput(e.target.value)}
+                  />
+                  <div className="mt-2 text-right">
+                    <Link
+                      to="/library"
+                      onClick={() => setShowCreateModal(false)}
+                      className="text-[9px] font-black uppercase text-brand-primary hover:underline"
+                    >
+                      Start from a template &rarr;
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[9px] font-black uppercase tracking-widest block mb-1 text-black/70">Notification Email</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs transition-colors rounded-none"
+                    value={notificationEmail}
+                    onChange={(e) => setNotificationEmail(e.target.value)}
+                  />
+                </div>
+
+                {/* Toggles */}
+                <div className="space-y-3 pt-2">
+                  <label className="flex items-center justify-between cursor-pointer border border-black/5 p-3 hover:bg-black/[0.01] transition-all">
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-brand-text">Email Notifications</p>
+                      <p className="text-[8px] text-black/40 font-bold uppercase tracking-widest">Alert me on new responses</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded-sm border-black text-brand-primary focus:ring-brand-primary accent-brand-primary"
+                      checked={emailNotifications}
+                      onChange={(e) => setEmailNotifications(e.target.checked)}
+                    />
+                  </label>
+
+                  <label className="flex items-center justify-between cursor-pointer border border-black/5 p-3 hover:bg-black/[0.01] transition-all">
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-brand-text">Spam Protection</p>
+                      <p className="text-[8px] text-black/40 font-bold uppercase tracking-widest">Verify and block bots</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 rounded-sm border-black text-brand-primary focus:ring-brand-primary accent-brand-primary"
+                      checked={spamProtection}
+                      onChange={(e) => setSpamProtection(e.target.checked)}
+                    />
+                  </label>
+                </div>
+
+                <div className="flex gap-3 pt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex-1 border-2 border-black py-3 font-black uppercase tracking-widest text-[10px] hover:bg-black/5 transition-all text-center"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 bg-brand-primary text-brand-text border-2 border-black py-3 font-black uppercase tracking-widest text-[10px] hover:bg-[#e67c00] transition-colors disabled:opacity-50"
+                  >
+                    {submitting ? 'Creating...' : 'Create Form'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* EMBED CODE MODAL */}
+      <AnimatePresence>
+        {showEmbedModal && selectedForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowEmbedModal(false)}></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 15 }}
+              className="bg-white w-full max-w-2xl relative z-10 p-8 border-4 border-black shadow-[12px_12px_0_rgba(0,0,0,1)]"
+            >
+              <button
+                onClick={() => setShowEmbedModal(false)}
+                className="absolute top-4 right-4 text-black/50 hover:text-black font-black text-lg transition-colors"
+              >
+                ✕
+              </button>
+
+              <h2 className="text-2xl font-black uppercase tracking-tighter mb-1">Integration Snippet</h2>
+              <p className="text-[10px] font-bold text-brand-primary mb-6 uppercase tracking-widest">
+                Form: {selectedForm.name}
+              </p>
+
+              {/* Tabs */}
+              <div className="flex border-b-2 border-black mb-6">
+                <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 border-2 border-black px-6 py-3 font-black uppercase tracking-widest text-[11px] hover:bg-black/5 transition-colors"
+                  onClick={() => setEmbedTab('script')}
+                  className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                    embedTab === 'script' ? 'bg-black text-white' : 'text-black/55 hover:bg-black/5'
+                  }`}
                 >
-                  Cancel
+                  Script Tag
                 </button>
-                <button 
-                  type="submit"
-                  className="flex-1 bg-brand-primary text-brand-text px-6 py-3 font-black uppercase tracking-widest text-[11px] hover:bg-[#e67c00] transition-colors shadow-[4px_4px_0_rgba(0,0,0,0.1)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                <button
+                  type="button"
+                  onClick={() => setEmbedTab('react')}
+                  className={`px-5 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                    embedTab === 'react' ? 'bg-black text-white' : 'text-black/55 hover:bg-black/5'
+                  }`}
                 >
-                  Create Form
+                  React Component
                 </button>
               </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
+
+              {/* Tab Contents */}
+              <div className="relative">
+                {embedTab === 'script' ? (
+                  <pre className="bg-[#111] text-white p-5 font-mono text-[10px] overflow-x-auto leading-relaxed border border-black mb-6 select-all">
+{`<script src="https://formspark.io/formspark.js"></script>
+<form data-formspark="${selectedForm.token}">
+  <input type="text" name="name" placeholder="Your name" />
+  <input type="email" name="email" placeholder="Email address" />
+  <textarea name="message" placeholder="Your message"></textarea>
+  <button type="submit">Send Message</button>
+</form>`}
+                  </pre>
+                ) : (
+                  <pre className="bg-[#111] text-white p-5 font-mono text-[10px] overflow-x-auto leading-relaxed border border-black mb-6 select-all">
+{`import { useEffect } from 'react'
+
+export default function ContactForm() {
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://formspark.io/formspark.js'
+    document.body.appendChild(script)
+    return () => document.body.removeChild(script)
+  }, [])
+
+  return (
+    <form data-formspark="${selectedForm.token}">
+      <input type="text" name="name" placeholder="Your name" />
+      <input type="email" name="email" placeholder="Email address" />
+      <textarea name="message" placeholder="Your message" />
+      <button type="submit">Send Message</button>
+    </form>
+  )
+}`}
+                  </pre>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = embedTab === 'script' 
+                      ? `<script src="https://formspark.io/formspark.js"></script>\n<form data-formspark="${selectedForm.token}">\n  <input type="text" name="name" placeholder="Your name" />\n  <input type="email" name="email" placeholder="Email address" />\n  <textarea name="message" placeholder="Your message"></textarea>\n  <button type="submit">Send Message</button>\n</form>`
+                      : `import { useEffect } from 'react'\n\nexport default function ContactForm() {\n  useEffect(() => {\n    const script = document.createElement('script')\n    script.src = 'https://formspark.io/formspark.js'\n    document.body.appendChild(script)\n    return () => document.body.removeChild(script)\n  }, [])\n\n  return (\n    <form data-formspark="${selectedForm.token}">\n      <input type="text" name="name" placeholder="Your name" />\n      <input type="email" name="email" placeholder="Email address" />\n      <textarea name="message" placeholder="Your message" />\n      <button type="submit">Send Message</button>\n    </form>\n  )\n}`;
+                    copyToClipboard(text, 'Snippet copied!');
+                  }}
+                  className="absolute right-3 top-3 bg-brand-primary text-brand-text border border-black px-3 py-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-[#e67c00] transition-colors"
+                >
+                  Copy Snippet
+                </button>
+              </div>
+
+              <p className="text-[10px] font-bold text-black/40 leading-relaxed uppercase tracking-wider">
+                Note: Replace TOKEN with your form token. Style the HTML form fields however you like.
+              </p>
+
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={() => setShowEmbedModal(false)}
+                  className="bg-black text-white border-2 border-black px-6 py-2.5 font-black uppercase tracking-widest text-[10px] hover:bg-brand-primary hover:text-brand-text transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* DELETE CONFIRM MODAL */}
+      <AnimatePresence>
+        {showDeleteModal && selectedForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 15 }}
+              className="bg-white w-full max-w-md relative z-10 p-8 border-4 border-red-500 shadow-[12px_12px_0_rgba(0,0,0,1)]"
+            >
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="absolute top-4 right-4 text-black/50 hover:text-black font-black text-lg transition-colors"
+              >
+                ✕
+              </button>
+
+              <div className="flex items-center gap-3 mb-4">
+                <AlertIcon />
+                <h2 className="text-2xl font-black uppercase tracking-tighter text-red-500">Delete Form</h2>
+              </div>
+
+              <p className="text-xs font-bold text-black/60 mb-6 uppercase tracking-wider leading-relaxed">
+                This will permanently delete <span className="text-black font-black">{selectedForm.name}</span> and all associated submissions. <span className="text-red-500 font-black">This action cannot be undone.</span>
+              </p>
+
+              <form onSubmit={handleFormDeleteSubmit} className="space-y-4">
+                <div>
+                  <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">
+                    Type <span className="font-black text-black select-all">"{selectedForm.name}"</span> to confirm
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter form name exactly"
+                    className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-red-500 font-bold text-xs transition-colors rounded-none"
+                    value={deleteConfirmName}
+                    onChange={(e) => setDeleteConfirmName(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 border-2 border-black py-3 font-black uppercase tracking-widest text-[10px] hover:bg-black/5 transition-colors text-center"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting || deleteConfirmName !== selectedForm.name}
+                    className="flex-1 bg-red-500 text-white border-2 border-red-500 py-3 font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-
-const StatCard = ({ title, value, change, icon, color }) => (
-  <div className="bg-white border border-black/5 p-8 group hover:border-black transition-all">
-    <div className="flex items-start justify-between mb-4">
-      <div className={`p-3 bg-brand-primary/5 rounded-lg group-hover:bg-brand-primary/10 transition-colors ${color}`}>
-        {icon}
-      </div>
-      <div className={`text-[10px] font-black uppercase tracking-widest ${change.includes('+') ? 'text-green-500' : 'text-black/30'}`}>
-        {change} <span className="text-black/20 ml-1 font-bold">vs last month</span>
-      </div>
-    </div>
-    <p className="text-[10px] font-black text-black/30 uppercase tracking-widest mb-1">{title}</p>
-    <h4 className="text-3xl font-black tabular-nums">{value.toLocaleString()}</h4>
-  </div>
-);
 
 export default Dashboard;

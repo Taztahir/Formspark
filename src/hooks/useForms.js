@@ -1,52 +1,42 @@
-import { useState, useEffect } from 'react';
-import { formsAPI } from '../services/api';
-import toast from 'react-hot-toast';
+import { useState, useEffect, useCallback } from 'react'
+import { getForms, createForm, updateForm, deleteForm } from '../services/formsService'
 
-const useForms = () => {
-  const [forms, setForms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export const useForms = () => {
+  const [forms, setForms] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const fetchForms = async () => {
-    setLoading(true);
+  const fetchForms = useCallback(async () => {
     try {
-      const res = await formsAPI.getForms();
-      setForms(res.data.forms);
+      setLoading(true)
+      setError(null)
+      const data = await getForms()
+      setForms(data)
     } catch (err) {
-      setError(err);
-      toast.error('Failed to load forms');
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }, [])
 
-  const createForm = async (data) => {
-    try {
-      const res = await formsAPI.createForm(data);
-      setForms([res.data.form, ...forms]);
-      toast.success('Form created successfully!');
-      return res.data.form;
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to create form');
-      throw err;
-    }
-  };
+  useEffect(() => { fetchForms() }, [fetchForms])
 
-  const deleteForm = async (token) => {
-    try {
-      await formsAPI.deleteForm(token);
-      setForms(forms.filter(f => f.token !== token));
-      toast.success('Form deleted');
-    } catch (err) {
-      toast.error('Failed to delete form');
-    }
-  };
+  const handleCreate = async (payload) => {
+    const newForm = await createForm(payload)
+    setForms(prev => [newForm, ...prev])
+    return newForm
+  }
 
-  useEffect(() => {
-    fetchForms();
-  }, []);
+  const handleUpdate = async (token, updates) => {
+    const updated = await updateForm(token, updates)
+    setForms(prev => prev.map(f => f.token === token ? updated : f))
+    return updated
+  }
 
-  return { forms, loading, error, fetchForms, createForm, deleteForm };
-};
+  const handleDelete = async (token) => {
+    await deleteForm(token)
+    setForms(prev => prev.filter(f => f.token !== token))
+  }
 
-export default useForms;
+  return { forms, loading, error, fetchForms, handleCreate, handleUpdate, handleDelete }
+}
