@@ -331,12 +331,12 @@ const FormSettings = () => {
   }
 
   return (
-    <div className="flex h-screen bg-[#F5F5F5] font-sans overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen bg-[#F5F5F5] font-sans overflow-hidden">
       <Sidebar />
       
       <main className="flex-1 flex flex-col overflow-y-auto">
         {/* Header */}
-        <header className="h-20 bg-white border-b border-black/5 flex items-center justify-between px-10 shrink-0">
+        <header className="h-20 bg-white border-b border-black/5 flex items-center justify-between px-6 md:px-10 shrink-0">
           <div className="flex items-center gap-4">
             <Link to="/dashboard" className="text-[11px] font-black uppercase text-black/40 hover:text-black transition-colors">Dashboard</Link>
             <span className="text-black/20">/</span>
@@ -347,7 +347,7 @@ const FormSettings = () => {
         </header>
 
         {/* Content Panel */}
-        <div className="p-10 max-w-4xl space-y-12 pb-24">
+        <div className="p-6 md:p-10 max-w-4xl space-y-12 pb-24">
           <div>
             <h1 className="text-4xl font-black uppercase tracking-tighter">Endpoint Configuration</h1>
             <p className="text-[13px] font-bold text-black/50 mt-1">Configure your form endpoint, integrations, webhooks, and team access.</p>

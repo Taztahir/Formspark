@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import useAuth from '../../hooks/useAuth';
 import { getForms } from '../../services/formsService';
 import { supabase } from '../../lib/supabase';
+
+const MenuIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+);
+
+const XIcon = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+);
 
 const Sidebar = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
 
+  const [isOpen, setIsOpen] = useState(false);
   const [newSubmissionsCount, setNewSubmissionsCount] = useState(0);
 
   useEffect(() => {
     let activeFormIds = [];
 
-    // Create the channel synchronously so we can return the cleanup function immediately
     const channel = supabase
       .channel('sidebar-new-submissions-badge')
       .on(
@@ -27,7 +36,6 @@ const Sidebar = () => {
       )
       .subscribe();
 
-    // Fetch the active forms list in the background
     const loadActiveForms = async () => {
       try {
         const forms = await getForms();
@@ -58,20 +66,26 @@ const Sidebar = () => {
     { name: 'Settings', path: '/dashboard/settings', icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z' }
   ];
 
-  return (
-    <aside className="w-64 h-full bg-[#111111] border-r border-black flex flex-col shrink-0">
+  const SidebarContent = ({ onLinkClick }) => (
+    <div className="flex flex-col h-full bg-[#111111]">
       {/* Brand */}
-      <div className="h-20 flex items-center px-8 border-b border-white/5">
-        <Link to="/" className="text-xl font-black tracking-tighter uppercase text-brand-primary">Formspark</Link>
+      <div className="h-20 flex items-center justify-between px-8 border-b border-white/5 shrink-0">
+        <Link to="/" onClick={onLinkClick} className="text-xl font-black tracking-tighter uppercase text-brand-primary">Formspark</Link>
+        <button onClick={onLinkClick} className="lg:hidden p-2 text-white/50 hover:text-white border-2 border-black active:translate-x-0.5 active:translate-y-0.5">
+          <XIcon />
+        </button>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-8 px-4 space-y-1">
+      <nav className="flex-1 py-8 px-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
-            onClick={item.name === 'Submissions' ? () => setNewSubmissionsCount(0) : undefined}
+            onClick={() => {
+              if (item.name === 'Submissions') setNewSubmissionsCount(0);
+              if (onLinkClick) onLinkClick();
+            }}
             className={({ isActive }) => `
               flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all
               ${isActive 
@@ -93,7 +107,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Status */}
-      <div className="px-8 mb-6">
+      <div className="px-8 mb-6 shrink-0">
         <div className="inline-flex items-center gap-2 border border-brand-primary/30 px-3 py-1 bg-transparent">
           <div className="w-1.5 h-1.5 bg-brand-primary rounded-full animate-pulse"></div>
           <span className="text-[9px] font-bold text-brand-primary tracking-widest uppercase">System Operational</span>
@@ -101,7 +115,7 @@ const Sidebar = () => {
       </div>
 
       {/* Footer Nav */}
-      <div className="px-4 pb-8 space-y-1">
+      <div className="px-4 pb-8 space-y-1 shrink-0">
         <button className="w-full flex items-center gap-3 px-4 py-2.5 text-[11px] font-bold text-white/40 hover:text-white transition-colors">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
           Help Center
@@ -134,7 +148,54 @@ const Sidebar = () => {
           Terminate
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile Sticky Header Bar */}
+      <div className="lg:hidden flex items-center justify-between w-full h-20 bg-[#111111] px-6 border-b border-black shrink-0 z-40">
+        <Link to="/" className="text-xl font-black tracking-tighter uppercase text-brand-primary">Formspark</Link>
+        <button 
+          onClick={() => setIsOpen(true)} 
+          className="p-3 bg-brand-primary text-brand-text border-2 border-black shadow-[3px_3px_0_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+        >
+          <MenuIcon />
+        </button>
+      </div>
+
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden lg:flex w-64 h-full bg-[#111111] border-r border-black flex-col shrink-0">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Drawer Overlay Slider */}
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+
+            {/* Sidebar drawer body */}
+            <motion.aside 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-80 max-w-[85vw] h-full bg-[#111111] border-r-4 border-black flex flex-col z-10"
+            >
+              <SidebarContent onLinkClick={() => setIsOpen(false)} />
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
