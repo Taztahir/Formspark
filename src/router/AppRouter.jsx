@@ -1,7 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import useAuth from '../hooks/useAuth';
 import Landing from '../pages/Landing';
 import Login from '../pages/Login';
 import Signup from '../pages/Signup';
@@ -10,27 +9,12 @@ import Submissions from '../pages/Submissions';
 import FormSettings from '../pages/FormSettings';
 import Library from '../pages/Library';
 import TermsOfService from '../pages/TermsOfService';
+import ApiKeys from '../pages/ApiKeys';
+import Team from '../pages/Team';
+import Forms from '../pages/Forms';
 import NotFound from '../pages/NotFound';
-import Spinner from '../components/ui/Spinner';
+import ProtectedRoute from './ProtectedRoute';
 import ScrollReset from '../components/ui/ScrollReset';
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-black">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  return children;
-};
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -55,6 +39,22 @@ const AnimatedRoutes = () => {
           }
         />
         <Route
+          path="/dashboard/forms"
+          element={
+            <ProtectedRoute>
+              <Forms />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/submissions"
+          element={
+            <ProtectedRoute>
+              <Submissions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/submissions/:token"
           element={
             <ProtectedRoute>
@@ -63,10 +63,34 @@ const AnimatedRoutes = () => {
           }
         />
         <Route
+          path="/dashboard/settings"
+          element={
+            <ProtectedRoute>
+              <FormSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/forms/:token/settings"
           element={
             <ProtectedRoute>
               <FormSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/api-keys"
+          element={
+            <ProtectedRoute>
+              <ApiKeys />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/team"
+          element={
+            <ProtectedRoute>
+              <Team />
             </ProtectedRoute>
           }
         />

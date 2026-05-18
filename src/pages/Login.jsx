@@ -97,20 +97,36 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { signIn, signInWithGoogle, signInWithGithub } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
+      await signIn(formData.email, formData.password);
       toast.success('Logged in successfully');
       navigate('/dashboard');
     } catch (err) {
-      toast.error('Invalid credentials');
+      toast.error(err.message || 'Invalid credentials');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      toast.error(err.message || 'Google sign in failed');
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    try {
+      await signInWithGithub();
+    } catch (err) {
+      toast.error(err.message || 'GitHub sign in failed');
     }
   };
 
@@ -230,6 +246,7 @@ const Login = () => {
               <div className="flex gap-3">
                 <button
                   type="button"
+                  onClick={handleGoogleSignIn}
                   className="flex-1 bg-transparent border border-brand-text text-brand-text font-bold uppercase tracking-widest py-2.5 px-2 flex items-center justify-center gap-2 hover:bg-brand-text/[0.03] transition-colors text-[10px]"
                 >
                   <GoogleIcon />
@@ -237,6 +254,7 @@ const Login = () => {
                 </button>
                 <button
                   type="button"
+                  onClick={handleGithubSignIn}
                   className="flex-1 bg-transparent border border-brand-text text-brand-text font-bold uppercase tracking-widest py-2.5 px-2 flex items-center justify-center gap-2 hover:bg-brand-text/[0.03] transition-colors text-[10px]"
                 >
                   <GitHubIcon />

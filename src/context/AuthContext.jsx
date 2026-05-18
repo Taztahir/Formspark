@@ -1,75 +1,100 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authAPI } from '../services/api';
-import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const checkAuth = async () => {
-    try {
-      const res = await authAPI.getMe();
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-    } catch (err) {
-      setUser(null);
-      setIsAuthenticated(false);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [initializing, setInitializing] = useState(true);
+  const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    checkAuth();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+      setInitializing(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email, password) => {
-    try {
-      const res = await authAPI.login({ email, password });
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-      toast.success('Welcome back!');
-      return res.data;
-    } catch (err) {
-      const msg = err.response?.data?.error || 'Login failed';
-      toast.error(msg);
-      throw err;
-    }
+  const signUp = async (email, password, name) => {
+    setAuthError(null);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) { setAuthError(error.message); throw error; }
+    return data;
   };
 
-  const signup = async (name, email, password) => {
-    try {
-      const res = await authAPI.signup({ name, email, password });
-      setUser(res.data.user);
-      setIsAuthenticated(true);
-      toast.success('Account created successfully!');
-      return res.data;
-    } catch (err) {
-      const msg = err.response?.data?.error || 'Signup failed';
-      toast.error(msg);
-      throw err;
-    }
+  const signIn = async (email, password) => {
+    setAuthError(null);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { setAuthError(error.message); throw error; }
+    return data;
   };
 
-  const logout = async () => {
-    try {
-      await authAPI.logout();
-      setUser(null);
-      setIsAuthenticated(false);
-      toast.success('Logged out');
-    } catch (err) {
-      toast.error('Logout failed');
-    }
+  const signInWithGoogle = async () => {
+    setAuthError(null);
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + '/dashboard' },
+    });
+    if (error) { setAuthError(error.message); throw error; }
+    return data;
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, signup, logout, checkAuth }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const signInWithGithub = async () => {
+    setAuthError(null);
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: { redirectTo: window.location.origin + '/dashboard' },
+    });
+    if (error) { setAuthError(error.message); throw error; }
+    return data;
+  };
+
+  const signOut = async () => {
+    setAuthError(null);
+    const { error } = await supabase.auth.signOut();
+    if (error) { setAuthError(error.message); throw error; }
+  };
+
+  const value = {
+    user,
+    session,
+    loading,
+    initializing,
+    authError,
+    isAuthenticated: !!user,
+    signUp,
+    signIn,
+    signInWithGoogle,
+    signInWithGithub,
+    signOut,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuthContext = () => useContext(AuthContext);
+// Export both names for flexibility
+export const useAuthContext = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const useAuth = useAuthContext;

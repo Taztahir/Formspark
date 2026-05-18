@@ -102,20 +102,36 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { signup } = useAuth();
+  const { signUp, signInWithGoogle, signInWithGithub } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signup(formData.name, formData.email, formData.password);
-      toast.success('Account created successfully');
-      navigate('/dashboard');
+      await signUp(formData.email, formData.password, formData.name);
+      toast.success('Check your email to confirm your account!');
+      navigate('/login');
     } catch (err) {
-      toast.error('Failed to create account');
+      toast.error(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      toast.error(err.message || 'Google sign in failed');
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    try {
+      await signInWithGithub();
+    } catch (err) {
+      toast.error(err.message || 'GitHub sign in failed');
     }
   };
 
@@ -246,6 +262,7 @@ const Signup = () => {
               <div className="flex gap-3">
                 <button
                   type="button"
+                  onClick={handleGoogleSignIn}
                   className="flex-1 bg-transparent border border-brand-text text-brand-text font-bold uppercase tracking-widest py-2.5 px-2 flex items-center justify-center gap-2 hover:bg-brand-text/[0.03] transition-colors text-[10px]"
                 >
                   <GoogleIcon />
@@ -253,6 +270,7 @@ const Signup = () => {
                 </button>
                 <button
                   type="button"
+                  onClick={handleGithubSignIn}
                   className="flex-1 bg-transparent border border-brand-text text-brand-text font-bold uppercase tracking-widest py-2.5 px-2 flex items-center justify-center gap-2 hover:bg-brand-text/[0.03] transition-colors text-[10px]"
                 >
                   <GitHubIcon />

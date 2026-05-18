@@ -1,218 +1,244 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  Globe, 
-  Trash2,
-  ChevronLeft,
-  Webhook,
-  MailCheck,
-  Zap,
-  ArrowLeft,
-  Save,
-  Loader2
-} from 'lucide-react';
-import PageWrapper from '../components/layout/PageWrapper';
-import { formsAPI } from '../services/api';
-import Button from '../components/ui/Button';
+import { motion } from 'framer-motion';
+import { formsService } from '../services/formsService';
+import { teamService } from '../services/teamService';
+import { apiKeyService } from '../services/apiKeyService';
+import Sidebar from '../components/layout/Sidebar';
 import toast from 'react-hot-toast';
-import { cn } from '../utils/cn';
+
+// Safe SVG Icons
+const SaveIcon = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+);
 
 const FormSettings = () => {
   const { token } = useParams();
   const navigate = useNavigate();
+  const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState(null);
-
-  const fetchForm = async () => {
-    try {
-      const res = await formsAPI.getForm(token);
-      setForm(res.data.form);
-    } catch (err) {
-      toast.error('FAILED_TO_SYNC_PROTOCOL');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
     fetchForm();
   }, [token]);
 
-  const handleUpdate = async (section, data) => {
+  const fetchForm = async () => {
+    try {
+      setLoading(true);
+      const data = await formsService.getFormByToken(token);
+      setForm(data);
+      setFormData(data);
+    } catch (err) {
+      toast.error('Failed to load form settings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
     setSaving(true);
     try {
-      await formsAPI.updateForm(token, data);
-      toast.success(`${section.toUpperCase()}_SYNCED`);
-      setForm({ ...form, ...data });
+      await formsService.updateForm(token, formData);
+      toast.success('Settings saved successfully');
+      setForm(formData);
     } catch (err) {
-      toast.error('SYNCHRONIZATION_ERROR');
+      toast.error('Failed to save settings');
     } finally {
       setSaving(false);
     }
   };
 
+  const handleDelete = async () => {
+    const confirmName = prompt(`To delete this form, type its name: "${form.name}"`);
+    if (confirmName !== form.name) {
+      if (confirmName !== null) toast.error('Name mismatch. Deletion cancelled.');
+      return;
+    }
+    
+    try {
+      await formsService.deleteForm(token);
+      toast.success('Form deleted successfully');
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error('Failed to delete form');
+    }
+  };
+
   if (loading) {
     return (
-      <PageWrapper title="Syncing Protocol">
-        <div className="flex items-center justify-center py-40">
-           <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent animate-spin"></div>
-        </div>
-      </PageWrapper>
+      <div className="flex h-screen items-center justify-center bg-[#F5F5F5]">
+        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent animate-spin"></div>
+      </div>
     );
   }
 
-  const sections = [
-    {
-      id: 'general',
-      title: 'Infrastructure',
-      icon: Globe,
-      fields: [
-        { key: 'name', label: 'Protocol Label', type: 'text', placeholder: 'e.g. ALPHA_SYSTEM_v1' },
-        { key: 'allowed_origins', label: 'Allowed Domains', type: 'text', placeholder: 'https://mysite.com, https://api.mysite.com' },
-        { key: 'redirect_url', label: 'Response Redirect', type: 'text', placeholder: 'https://mysite.com/success' },
-      ]
-    },
-    {
-      id: 'notifications',
-      title: 'Automation',
-      icon: MailCheck,
-      toggle: 'email_notifications',
-      fields: [
-        { key: 'autoresponse_message', label: 'Auto-Response Schema', type: 'textarea', placeholder: 'Payload received. System response initialized.' },
-      ]
-    },
-    {
-      id: 'security',
-      title: 'Shield_v2',
-      icon: Shield,
-      fields: [
-        { key: 'spam_blacklist', label: 'Pattern Blacklist', type: 'text', placeholder: 'crypto, giveaway, bot (comma separated)' },
-      ]
-    },
-    {
-      id: 'webhooks',
-      title: 'Integrations',
-      icon: Webhook,
-      fields: [
-        { key: 'webhook_url', label: 'Webhook Endpoint', type: 'text', placeholder: 'https://hooks.zapier.com/...' },
-      ]
-    }
-  ];
-
   return (
-    <PageWrapper
-      title="Settings"
-      subtitle={`Configure operational parameters for: ${token}`}
-      actions={
-        <Link to="/dashboard">
-          <Button variant="outline" size="sm" icon={ArrowLeft}>Back</Button>
-        </Link>
-      }
-    >
-      <div className="max-w-4xl mx-auto space-y-16">
-        {sections.map((section, idx) => (
-          <div key={section.id} className="border border-brand-border bg-brand-bg shadow-[10px_10px_0px_var(--color-brand-border)] overflow-hidden">
-            <div className="p-10 border-b border-brand-border bg-brand-text text-brand-bg flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 border-2 border-brand-bg flex items-center justify-center text-brand-primary shadow-[4px_4px_0px_var(--color-brand-primary)]">
-                  <section.icon size={24} strokeWidth={2.5} />
+    <div className="flex h-screen bg-[#F5F5F5] font-sans overflow-hidden">
+      <Sidebar />
+      
+      <main className="flex-1 flex flex-col overflow-y-auto">
+        <header className="h-20 bg-white border-b border-black/5 flex items-center justify-between px-10 shrink-0">
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard" className="text-[11px] font-black uppercase text-black/40 hover:text-black transition-colors">Dashboard</Link>
+            <span className="text-black/20">/</span>
+            <span className="text-[11px] font-black uppercase tracking-widest text-brand-primary border-b-2 border-brand-primary pb-7 mt-7">Settings</span>
+          </div>
+          
+          <button 
+            onClick={handleUpdate}
+            disabled={saving}
+            className="bg-black text-white px-6 py-2.5 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-brand-primary transition-all disabled:opacity-50"
+          >
+            {saving ? <div className="w-3 h-3 border-2 border-white border-t-transparent animate-spin"></div> : <SaveIcon />}
+            Save Changes
+          </button>
+        </header>
+
+        <div className="p-10 max-w-4xl">
+          <div className="mb-12">
+            <h1 className="text-4xl font-black uppercase tracking-tighter">Form Settings</h1>
+            <p className="text-[13px] font-bold text-black/50 mt-1">Configure your form endpoint, notifications, and security.</p>
+          </div>
+
+          <form onSubmit={handleUpdate} className="space-y-10 pb-24">
+            {/* General Section */}
+            <SettingsSection title="General" description="Basic configuration for your form.">
+              <div className="space-y-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40 block mb-2">Form Name</label>
+                  <input 
+                    type="text"
+                    className="w-full bg-white border border-black/5 px-4 py-3 outline-none focus:border-brand-primary font-bold text-sm transition-colors"
+                    value={formData.name || ''}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tighter">{section.title}</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Section_{idx + 1}</p>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40 block mb-2">Form Token</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text"
+                      readOnly
+                      className="flex-1 bg-black/[0.02] border border-black/5 px-4 py-3 outline-none font-mono text-xs text-black/40"
+                      value={form.token}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => { navigator.clipboard.writeText(form.token); toast.success('Token copied!'); }}
+                      className="px-4 border border-black/5 hover:border-black transition-colors text-[10px] font-black uppercase"
+                    >
+                      Copy
+                    </button>
+                  </div>
                 </div>
               </div>
+            </SettingsSection>
 
-              {section.toggle && (
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Status_</span>
+            {/* Notifications */}
+            <SettingsSection title="Notifications" description="Manage how you receive alerts for new submissions.">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-tight">Email Notifications</p>
+                    <p className="text-[11px] font-bold text-black/40">Receive an email for every new submission.</p>
+                  </div>
                   <button 
-                    onClick={() => handleUpdate(section.title, { [section.toggle]: !form[section.toggle] })}
-                    className={cn(
-                      "w-20 h-10 border-2 transition-all flex items-center px-1",
-                      form[section.toggle] ? "bg-brand-primary border-brand-bg" : "bg-brand-bg/20 border-brand-bg/40"
-                    )}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, email_notifications: !formData.email_notifications })}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${formData.email_notifications ? 'bg-brand-primary' : 'bg-black/10'}`}
                   >
-                    <div className={cn(
-                      "w-7 h-7 border-2 border-brand-bg transition-transform",
-                      form[section.toggle] ? "translate-x-10 bg-brand-text" : "translate-x-0 bg-brand-text/40"
-                    )} />
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.email_notifications ? 'left-7' : 'left-1'}`}></div>
                   </button>
                 </div>
-              )}
-            </div>
+                {formData.email_notifications && (
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-black/40 block mb-2">Notification Email</label>
+                    <input 
+                      type="email"
+                      placeholder="leave blank to use account email"
+                      className="w-full bg-white border border-black/5 px-4 py-3 outline-none focus:border-brand-primary font-bold text-sm transition-colors"
+                      value={formData.notification_email || ''}
+                      onChange={(e) => setFormData({ ...formData, notification_email: e.target.value })}
+                    />
+                  </div>
+                )}
+              </div>
+            </SettingsSection>
 
-            <div className="p-10 space-y-12">
-              {section.fields.map((field) => (
-                <div key={field.key} className="space-y-4">
-                   <label className="text-xs font-black uppercase tracking-widest opacity-40 block">
-                    {field.label}
-                   </label>
-                   {field.type === 'textarea' ? (
-                    <textarea
-                      className="w-full bg-brand-text/5 border-2 border-brand-border p-6 text-brand-text font-bold focus:outline-none focus:border-brand-primary transition-colors min-h-[150px] text-lg leading-tight uppercase placeholder:opacity-20"
-                      defaultValue={form[field.key]}
-                      onBlur={(e) => handleUpdate(section.title, { [field.key]: e.target.value })}
-                      placeholder={field.placeholder}
-                    />
-                   ) : (
-                    <input
-                      type="text"
-                      placeholder={field.placeholder}
-                      defaultValue={form[field.key]}
-                      onBlur={(e) => handleUpdate(section.title, { [field.key]: e.target.value })}
-                      className="w-full h-16 bg-brand-text/5 border-2 border-brand-border px-6 text-lg font-bold uppercase tracking-tight focus:outline-none focus:border-brand-primary transition-colors placeholder:opacity-20"
-                    />
-                   )}
+            {/* Redirects */}
+            <SettingsSection title="Redirects" description="Where to send users after they submit your form.">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-black/40 block mb-2">Redirect URL</label>
+                <input 
+                  type="url"
+                  placeholder="https://your-site.com/thanks"
+                  className="w-full bg-white border border-black/5 px-4 py-3 outline-none focus:border-brand-primary font-bold text-sm transition-colors"
+                  value={formData.redirect_url || ''}
+                  onChange={(e) => setFormData({ ...formData, redirect_url: e.target.value })}
+                />
+              </div>
+            </SettingsSection>
+
+            {/* Security */}
+            <SettingsSection title="Security" description="Protect your form from spam and unauthorized access.">
+              <div className="space-y-6">
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40 block mb-2">Allowed Origins (CORS)</label>
+                  <input 
+                    type="text"
+                    placeholder="https://mysite.com, https://api.mysite.com"
+                    className="w-full bg-white border border-black/5 px-4 py-3 outline-none focus:border-brand-primary font-bold text-sm transition-colors"
+                    value={formData.allowed_origins?.join(', ') || ''}
+                    onChange={(e) => setFormData({ ...formData, allowed_origins: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  />
+                  <p className="text-[10px] font-bold text-black/30 mt-2">Comma-separated list of domains that can submit to this form.</p>
                 </div>
-              ))}
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-black/40 block mb-2">Spam Blacklist</label>
+                  <textarea 
+                    placeholder="crypto, giveaway, bot (one per line or comma-separated)"
+                    className="w-full bg-white border border-black/5 px-4 py-3 outline-none focus:border-brand-primary font-bold text-sm transition-colors min-h-[100px]"
+                    value={formData.spam_blacklist?.join(', ') || ''}
+                    onChange={(e) => setFormData({ ...formData, spam_blacklist: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  />
+                </div>
+              </div>
+            </SettingsSection>
+
+            {/* Danger Zone */}
+            <div className="pt-10 border-t-4 border-red-500/20">
+              <div className="bg-red-50 border border-red-200 p-8 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-red-600">Danger Zone</h3>
+                  <p className="text-[11px] font-bold text-red-600/60 uppercase tracking-widest mt-1">Irreversible actions ahead.</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-colors shadow-[4px_4px_0_rgba(220,38,38,0.2)]"
+                >
+                  Delete Form
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-
-        {/* Danger Zone */}
-        <div className="border border-red-500 bg-red-500/5 p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-[15px_15px_0px_var(--color-brand-border)]">
-          <div className="flex items-center gap-8 text-center md:text-left">
-             <div className="w-20 h-20 border-4 border-red-500 flex items-center justify-center text-red-500 shadow-[8px_8px_0px_#f00]">
-               <Trash2 size={32} strokeWidth={3} />
-             </div>
-             <div>
-                <h3 className="text-3xl font-black text-brand-text tracking-tighter uppercase mb-2">Destruction_Sequence</h3>
-                <p className="text-sm font-bold opacity-60 uppercase tracking-widest max-w-sm">Permanently decommission this endpoint and wipe all intercepted data packets.</p>
-             </div>
-          </div>
-          <button 
-            onClick={() => {
-              if(confirm('INITIATE DESTRUCTION SEQUENCE? ALL DATA WILL BE LOST.')) {
-                toast.error('PROTOCOL_LOCKED_IN_DEMO');
-              }
-            }}
-            className="h-16 px-12 bg-red-500 text-white font-black uppercase tracking-widest hover:bg-black transition-colors shadow-[10px_10px_0px_#000]"
-          >
-            Purge Endpoint
-          </button>
+          </form>
         </div>
-      </div>
-
-      {/* Floating Save Status */}
-      <AnimatePresence>
-        {saving && (
-          <motion.div
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
-            className="fixed bottom-12 right-12 bg-brand-text text-brand-bg px-8 py-4 border-2 border-brand-primary flex items-center gap-4 z-[100] shadow-[10px_10px_0px_var(--color-brand-primary)]"
-          >
-            <Loader2 className="animate-spin" size={18} strokeWidth={3} />
-            <span className="text-xs font-black uppercase tracking-widest">Applying Protocol_</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </PageWrapper>
+      </main>
+    </div>
   );
 };
+
+const SettingsSection = ({ title, description, children }) => (
+  <div className="bg-white border border-black/5 p-8">
+    <div className="mb-8">
+      <h3 className="text-[11px] font-black uppercase tracking-widest">{title}</h3>
+      <p className="text-[11px] font-bold text-black/30 uppercase mt-1 tracking-wider">{description}</p>
+    </div>
+    {children}
+  </div>
+);
 
 export default FormSettings;
