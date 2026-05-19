@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import Spinner from '../components/ui/Spinner';
 
 // Safe SVG Icons
 const MailIcon = () => (

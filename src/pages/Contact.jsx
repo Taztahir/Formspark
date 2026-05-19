@@ -3,9 +3,11 @@ import { motion } from 'framer-motion';
 import { Mail, MessageSquare, Send, CheckCircle, HelpCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const Contact = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,6 +16,17 @@ const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Pre-fill name and email when user is logged in so they don't have to start afresh
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.user_metadata?.name || prev.name,
+        email: user.email || prev.email
+      }));
+    }
+  }, [user]);
 
   // In local development, inject the local Formspark script
   useEffect(() => {
@@ -38,90 +51,55 @@ const Contact = () => {
 
     setLoading(true);
     try {
-      // 1. Get or create a local form in the database to receive these submissions
-      let targetForm = null;
-
-      const { data: activeUser } = await supabase.auth.getUser();
+      const contactFormToken = 'e940eef0-797e-46a9-ac86-0b4ffe26a31c';
       
-      // Look for a form named 'Contact Messages'
-      const { data: existingForms, error: fetchError } = await supabase
-        .from('forms')
-        .select('id, token')
-        .limit(1);
+      const payload = JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message
+      });
 
-      if (existingForms && existingForms.length > 0) {
-        targetForm = existingForms[0];
-      } else if (activeUser?.user) {
-        // If logged in but no forms exist, automatically provision a form for contact submissions!
-        const { data: newForm, error: createError } = await supabase
-          .from('forms')
-          .insert({
-            name: 'Contact Page Messages',
-            user_id: activeUser.user.id,
-            email_notifications: false
-          })
-          .select('id, token')
-          .single();
-
-        if (!createError && newForm) {
-          targetForm = newForm;
-        }
-      }
-
-      if (!targetForm) {
-        // Fallback: If logged out and database is empty, simulate local submission successfully
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setSubmitted(true);
-        toast.success('Local sandbox simulation completed!');
-        setLoading(false);
-        return;
-      }
-
-      // 2. Transmit to local backend server
-      const localBackendUrl = `http://localhost:3000/submit/${targetForm.token}`;
+      // 1. Transmit to local backend server first
+      const localBackendUrl = `http://localhost:3000/submit/${contactFormToken}`;
       let serverResponseOk = false;
 
       try {
         const response = await fetch(localBackendUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            subject: formData.subject,
-            message: formData.message
-          })
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: payload
         });
         if (response.ok) {
           serverResponseOk = true;
         }
       } catch (netErr) {
-        console.warn('Local Node server offline or CORS restricted. Falling back to direct database insertion.');
+        console.warn('Local Node server offline. Falling back to Supabase Edge Function.');
       }
 
-      // 3. Fallback: If local backend server is down or CORS rejects it, write directly to database
+      // 2. Fallback: Call the deployed Supabase Edge Function directly.
+      //    This uses the service role key server-side so it bypasses RLS and
+      //    also fires the Resend email notification automatically.
       if (!serverResponseOk) {
-        const { error: dbError } = await supabase
-          .from('submissions')
-          .insert({
-            form_id: targetForm.id,
-            data: {
-              name: formData.name,
-              email: formData.email,
-              subject: formData.subject,
-              message: formData.message
-            },
-            is_spam: false
-          });
-
-        if (dbError) throw dbError;
+        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://clfzdsolflhvbkqxszhg.supabase.co';
+        const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsZnpkc29sZmxodmJrcXhzemhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NzA5MDEsImV4cCI6MjA5NDQ0NjkwMX0.OAPBm7NU-Cobm-0Fmuzfbvv9FT_UvnJBy-HaEUqYGI4';
+        const edgeUrl = `${SUPABASE_URL}/functions/v1/submit/${contactFormToken}`;
+        const edgeResponse = await fetch(edgeUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: payload
+        });
+        if (!edgeResponse.ok) {
+          const errData = await edgeResponse.json().catch(() => ({}));
+          throw new Error(errData.error || 'Edge function submission failed.');
+        }
       }
 
       setSubmitted(true);
-      toast.success('Submission successfully stored in local database!');
+      toast.success('Message sent! We\'ll get back to you shortly.');
     } catch (err) {
       console.error(err);
       toast.error('An error occurred during submission.');
@@ -129,6 +107,7 @@ const Contact = () => {
       setLoading(false);
     }
   };
+
 
   const resetForm = () => {
     setFormData({ name: '', email: '', subject: 'general', message: '' });
