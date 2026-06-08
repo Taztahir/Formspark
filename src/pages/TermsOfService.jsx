@@ -88,7 +88,7 @@ const TermsOfService = () => {
           className="mt-24 pt-12 border-t border-brand-text/10"
         >
           <p className="text-sm font-bold opacity-40">
-            If you have any questions about these Terms, please contact us at <a href="mailto:legal@formspark.io" className="text-brand-primary hover:underline">legal@formspark.io</a>.
+            If you have any questions about these Terms, please contact us at <a href="mailto:legal@formspark-five.vercel.app" className="text-brand-primary hover:underline">legal@formspark-five.vercel.app</a>.
           </p>
           <div className="mt-8">
             <Link to="/" className="inline-flex items-center gap-2 font-black uppercase text-xs tracking-widest hover:text-brand-primary transition-colors">

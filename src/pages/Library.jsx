@@ -95,7 +95,7 @@ const AgencyContact = () => (
     <div className="p-6 bg-brand-primary text-brand-text flex flex-col justify-between border-b-2 sm:border-b-0 sm:border-r-2 border-black">
       <h3 className="text-2xl font-black uppercase leading-none tracking-tight">Let's build.</h3>
       <div className="space-y-1 text-[10px] font-bold opacity-75 mt-6">
-        <p>hello@formspark.io</p>
+        <p>hello@formspark-five.vercel.app</p>
         <p>+1 234 567 890</p>
       </div>
     </div>
@@ -132,12 +132,12 @@ const libraryItems = [
     category: 'Forms',
     name: 'Waitlist Form',
     description: 'A simple way to collect email addresses for your upcoming launch.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <input type="email" name="email" placeholder="Your email" required />
   <button type="submit">Join Waitlist</button>
 </form>`,
     react: (token) => `export const Waitlist = () => (
-  <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="flex border-2 border-black">
+  <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="flex border-2 border-black">
     <input type="email" name="email" className="flex-1 p-4 bg-white" placeholder="Your email" required />
     <button className="bg-black text-white px-8 font-bold uppercase">Join</button>
   </form>
@@ -149,14 +149,14 @@ const libraryItems = [
     category: 'Forms',
     name: 'Simple Contact',
     description: 'A clean contact form with clear text fields and labels.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <input type="text" name="name" placeholder="Name" required />
   <input type="email" name="email" placeholder="Email" required />
   <textarea name="message" placeholder="Message"></textarea>
   <button type="submit">Send Message</button>
 </form>`,
     react: (token) => `export const Contact = () => (
-  <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="p-8 border-2 border-black space-y-4">
+  <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="p-8 border-2 border-black space-y-4">
     <input type="text" name="name" className="w-full border-b-2 border-black p-2" placeholder="Name" required />
     <input type="email" name="email" className="w-full border-b-2 border-black p-2" placeholder="Email" required />
     <textarea name="message" className="w-full border-b-2 border-black p-2 h-32" placeholder="Message"></textarea>
@@ -170,14 +170,14 @@ const libraryItems = [
     category: 'Forms',
     name: 'Bold Contact',
     description: 'A striking contact form with thick borders and an orange background.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <input type="text" name="name" required />
   <textarea name="message" required></textarea>
   <button type="submit">Send</button>
 </form>`,
     react: (token) => `export const BoldContact = () => (
   <div className="p-8 border-4 border-black bg-orange-500 shadow-[12px_12px_0_#000]">
-    <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="space-y-4">
+    <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="space-y-4">
       <input type="text" name="name" className="w-full border-2 border-black p-4" placeholder="NAME" required />
       <textarea name="message" className="w-full border-2 border-black p-4 h-32" placeholder="MESSAGE" required></textarea>
       <button className="w-full bg-black text-orange-500 py-4 font-black uppercase">Send</button>
@@ -191,7 +191,7 @@ const libraryItems = [
     category: 'Forms',
     name: 'Agency Contact',
     description: 'A professional split-screen form for creative agencies and studios.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <input type="text" name="name" required />
   <input type="email" name="email" required />
   <textarea name="message"></textarea>
@@ -200,7 +200,7 @@ const libraryItems = [
     react: (token) => `export const AgencyContact = () => (
   <div className="grid grid-cols-2 border-2 border-black">
     <div className="p-8 bg-orange-500 font-black">Let's Build.</div>
-    <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="p-8 space-y-4">
+    <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="p-8 space-y-4">
       <input type="text" name="name" placeholder="Name" className="w-full p-4 border-2 border-black" required />
       <button className="w-full bg-black text-white py-4 font-black">Start</button>
     </form>
@@ -213,14 +213,14 @@ const libraryItems = [
     category: 'Forms',
     name: 'Dark Contact',
     description: 'A high-tech dark form with mono-spaced fonts and orange highlights.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <input type="text" name="name" required />
   <button type="submit">Send</button>
 </form>`,
     react: (token) => `export const DarkContact = () => (
   <div className="bg-black text-white p-10 border-4 border-orange-500">
     <h3 className="font-mono text-xs mb-8 text-orange-500">Secure_Channel</h3>
-    <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="space-y-4">
+    <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="space-y-4">
       <input type="text" name="name" placeholder="IDENT_NAME" className="w-full p-4 bg-white/10 border border-white/20 font-mono text-xs" required />
       <button className="w-full bg-orange-500 text-black py-4 font-black uppercase text-xs">Initialize</button>
     </form>
@@ -233,12 +233,12 @@ const libraryItems = [
     category: 'Forms',
     name: 'Newsletter Form',
     description: 'A small form that fits perfectly in your website footer or sidebar.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <input type="email" name="email" placeholder="Subscribe" required />
   <button type="submit">Join</button>
 </form>`,
     react: (token) => `export const Newsletter = () => (
-  <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="flex border-4 border-black">
+  <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="flex border-4 border-black">
     <input type="email" name="email" className="flex-1 p-4 outline-none" placeholder="Email" required />
     <button className="bg-black text-white px-8 font-bold uppercase">Join</button>
   </form>
@@ -250,12 +250,12 @@ const libraryItems = [
     category: 'Feedback',
     name: 'Feedback Box',
     description: 'A simple box for users to share their thoughts or report bugs.',
-    html: (token) => `<form action="https://api.formspark.io/v1/submit/${token}" method="POST">
+    html: (token) => `<form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST">
   <textarea name="feedback" placeholder="Message" required></textarea>
   <button type="submit">Send</button>
 </form>`,
     react: (token) => `export const Feedback = () => (
-  <form action="https://api.formspark.io/v1/submit/${token}" method="POST" className="p-6 border-2 border-black bg-white">
+  <form action="${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit/\${token}" method="POST" className="p-6 border-2 border-black bg-white">
     <textarea name="feedback" className="w-full border-2 border-black p-4 mb-4" required />
     <button className="w-full bg-orange-500 text-white p-4 font-bold">Send</button>
   </form>
@@ -338,8 +338,8 @@ const Library = () => {
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className={`
             hidden lg:flex absolute top-1/2 -translate-y-1/2 z-[51]
-            w-8 h-12 bg-black text-white items-center justify-center
-            border-2 border-black hover:bg-brand-primary hover:text-black transition-all duration-300
+            w-8 h-12 bg-brand-text text-brand-bg items-center justify-center
+            border-2 border-brand-border hover:bg-brand-primary hover:text-[#111111] transition-all duration-300
             ${sidebarOpen ? 'left-[288px]' : 'left-0'}
           `}
         >
@@ -352,12 +352,12 @@ const Library = () => {
           animate={{ x: 0, opacity: 1 }}
           className={`
             fixed lg:relative inset-0 lg:inset-auto z-50 lg:z-auto
-            bg-[#F5F5F5] flex flex-col shrink-0 transition-all duration-300 ease-[0.16,1,0.3,1]
-            ${sidebarOpen ? 'w-72 border-r-2 border-black' : 'w-0 overflow-hidden border-r-0'}
+            bg-brand-light-bg flex flex-col shrink-0 transition-all duration-300 ease-[0.16,1,0.3,1]
+            ${sidebarOpen ? 'w-72 border-r-2 border-brand-border' : 'w-0 overflow-hidden border-r-0'}
             ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
-          <div className="p-6 border-b-2 border-black min-w-[288px] bg-white">
+          <div className="p-6 border-b-2 border-brand-border min-w-[288px] bg-brand-card">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 opacity-35" size={14} />
               <input 
@@ -365,7 +365,7 @@ const Library = () => {
                 placeholder="Search templates..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[#FAF9F5] border-2 border-black p-2.5 pl-10 font-bold focus:outline-none focus:border-brand-primary transition-colors placeholder:opacity-50 text-xs"
+                className="w-full bg-brand-bg text-brand-text border-2 border-brand-border p-2.5 pl-10 font-bold focus:outline-none focus:border-brand-primary transition-colors placeholder:opacity-50 text-xs"
               />
             </div>
           </div>
@@ -373,7 +373,7 @@ const Library = () => {
           <nav className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar min-w-[288px]">
             {['Forms', 'Feedback'].map((cat) => (
               <div key={cat} className="space-y-1">
-                <p className="px-4 py-1.5 text-[9px] font-black uppercase opacity-40 tracking-widest">{cat}</p>
+                <p className="px-4 py-1.5 text-[9px] font-black uppercase text-brand-muted tracking-widest">{cat}</p>
                 {filteredItems.filter(i => i.category === cat).map(item => (
                   <button
                     key={item.id}
@@ -383,14 +383,14 @@ const Library = () => {
                     }}
                     className={`w-full text-left px-4 py-3 font-bold uppercase text-[11px] flex items-center justify-between group transition-all border-2 ${
                       selectedId === item.id 
-                        ? 'bg-black text-white border-black' 
-                        : 'bg-transparent border-transparent hover:bg-black/5 hover:border-black/10'
+                        ? 'bg-brand-text text-brand-bg border-brand-border' 
+                        : 'bg-transparent border-transparent hover:bg-brand-text/5 hover:border-brand-border/10'
                     }`}
                   >
                     {item.name}
                     <div className="flex items-center gap-2">
                       {useCounts[item.id] > 0 && (
-                        <span className="text-[8px] px-1.5 py-0.5 bg-brand-primary text-black font-black uppercase rounded-sm border border-black/10">
+                        <span className="text-[8px] px-1.5 py-0.5 bg-brand-primary text-[#111111] font-black uppercase rounded-sm border border-black/10">
                           {useCounts[item.id]} copied
                         </span>
                       )}
@@ -402,7 +402,7 @@ const Library = () => {
             ))}
           </nav>
 
-          <div className="p-6 border-t-2 border-black bg-black text-white flex items-center justify-between min-w-[288px]">
+          <div className="p-6 border-t-2 border-brand-border bg-brand-text text-brand-bg flex items-center justify-between min-w-[288px]">
             <span className="font-black uppercase text-[9px] tracking-widest">Library status</span>
             <div className="flex items-center gap-2">
               <span className="text-[9px] font-bold text-green-400">ONLINE</span>
@@ -426,12 +426,12 @@ const Library = () => {
             className="max-w-4xl mx-auto space-y-10 relative z-10"
           >
             {/* Header */}
-            <div className="space-y-2 border-b-2 border-black pb-8">
+            <div className="space-y-2 border-b-2 border-brand-border/10 pb-8">
               <span className="text-brand-primary font-black uppercase tracking-widest text-[10px]">Live Interactive Preview</span>
               <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
                 {activeItem.name}
               </h1>
-              <p className="text-sm font-bold text-black/50 max-w-2xl leading-snug">
+              <p className="text-sm font-bold text-brand-muted max-w-2xl leading-snug">
                 {activeItem.description}
               </p>
             </div>
@@ -439,7 +439,7 @@ const Library = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               {/* Preview Rendering */}
               <div className="space-y-6">
-                <div className="bg-[#FAF9F5] border-4 border-black p-8 md:p-10 min-h-[300px] flex items-center justify-center relative shadow-[8px_8px_0_rgba(0,0,0,1)]">
+                <div className="bg-brand-light-bg border-4 border-brand-border p-8 md:p-10 min-h-[300px] flex items-center justify-center relative shadow-[8px_8px_0_var(--color-brand-shadow)]">
                   <div className="absolute top-4 left-4 text-[9px] font-black uppercase opacity-25 tracking-widest">Interactive Component Mock</div>
                   <div className="w-full flex justify-center">
                     <activeItem.Preview />
@@ -452,7 +452,7 @@ const Library = () => {
                     { label: 'Neo-Brutalist', icon: CheckCircle2 },
                     { label: 'Tested Code', icon: CheckCircle2 },
                   ].map(feat => (
-                    <div key={feat.label} className="border-2 border-black p-2.5 flex items-center gap-2 bg-white">
+                    <div key={feat.label} className="border-2 border-brand-border p-2.5 flex items-center gap-2 bg-brand-card">
                       <CheckCircle2 size={12} className="text-green-500 shrink-0" />
                       <span className="font-black text-[8px] uppercase tracking-wider">{feat.label}</span>
                     </div>
@@ -463,18 +463,18 @@ const Library = () => {
               {/* Code Blocks & Token Wiring */}
               <div className="flex flex-col space-y-6">
                 {/* Wiring Section */}
-                <div className="bg-white border-4 border-black p-5 shadow-[4px_4px_0_rgba(0,0,0,1)] space-y-4">
+                <div className="bg-brand-card border-4 border-brand-border p-5 shadow-[4px_4px_0_var(--color-brand-shadow)] space-y-4">
                   <div>
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-brand-primary">Form Token Connection</h3>
-                    <p className="text-[9px] font-bold text-black/40 uppercase mt-0.5">Wire this snippet directly to an endpoint in your account.</p>
+                    <p className="text-[9px] font-bold text-brand-muted uppercase mt-0.5">Wire this snippet directly to an endpoint in your account.</p>
                   </div>
 
                   {isAuthenticated ? (
                     forms.length > 0 ? (
                       <div className="space-y-2">
-                        <label className="text-[8px] font-black uppercase text-black/55 tracking-wider block">Connected Form</label>
+                        <label className="text-[8px] font-black uppercase text-brand-muted tracking-wider block">Connected Form</label>
                         <select
-                          className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2 outline-none font-bold text-xs rounded-none"
+                          className="w-full bg-brand-light-bg border-2 border-brand-border px-4 py-2 outline-none font-bold text-xs rounded-none text-brand-text"
                           value={selectedToken}
                           onChange={(e) => setSelectedToken(e.target.value)}
                         >
@@ -484,44 +484,44 @@ const Library = () => {
                         </select>
                       </div>
                     ) : (
-                      <div className="p-3 bg-brand-primary/10 border border-brand-primary text-xs font-bold text-black/70">
-                        No form endpoints active. We're using placeholder tokens. Create a form in <Link to="/dashboard" className="underline font-black">Dashboard</Link> first.
+                      <div className="p-3 bg-brand-primary/10 border border-brand-primary text-xs font-bold text-brand-muted">
+                        No form endpoints active. We're using placeholder tokens. Create a form in <Link to="/dashboard" className="underline font-black text-brand-text">Dashboard</Link> first.
                       </div>
                     )
                   ) : (
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3 bg-brand-primary/5 border border-brand-primary/20">
-                      <p className="text-[9px] font-bold text-black/50 uppercase tracking-wide">Login to automatically wire your actual form tokens.</p>
-                      <Link to="/login" className="bg-black text-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest shrink-0">Login</Link>
+                      <p className="text-[9px] font-bold text-brand-muted uppercase tracking-wide">Login to automatically wire your actual form tokens.</p>
+                      <Link to="/login" className="bg-brand-text text-brand-bg px-3 py-1.5 text-[9px] font-black uppercase tracking-widest shrink-0">Login</Link>
                     </div>
                   )}
                 </div>
 
                 {/* Code display */}
                 <div className="flex flex-col">
-                  <div className="flex border-2 border-black bg-white">
+                  <div className="flex border-2 border-brand-border bg-brand-card">
                     <button 
                       onClick={() => setCodeType('react')}
-                      className={`flex-1 py-2 font-black uppercase text-[9px] border-r-2 border-black transition-all ${codeType === 'react' ? 'bg-black text-white' : 'hover:bg-brand-primary hover:text-black'}`}
+                      className={`flex-1 py-2 font-black uppercase text-[9px] border-r-2 border-brand-border transition-all ${codeType === 'react' ? 'bg-brand-text text-brand-bg' : 'hover:bg-brand-primary hover:text-[#111111]'}`}
                     >
                       React Component
                     </button>
                     <button 
                       onClick={() => setCodeType('html')}
-                      className={`flex-1 py-2 font-black uppercase text-[9px] transition-all ${codeType === 'html' ? 'bg-black text-white' : 'hover:bg-brand-primary hover:text-black'}`}
+                      className={`flex-1 py-2 font-black uppercase text-[9px] transition-all ${codeType === 'html' ? 'bg-brand-text text-brand-bg' : 'hover:bg-brand-primary hover:text-[#111111]'}`}
                     >
                       Raw HTML5 Form
                     </button>
                   </div>
 
-                  <div className="bg-[#111] text-brand-primary p-5 font-mono text-[10px] relative mt-3 border-4 border-black shadow-[6px_6px_0_#FF8A00] overflow-hidden min-h-[220px]">
+                  <div className="bg-[#111111] text-brand-primary p-5 font-mono text-[10px] relative mt-3 border-4 border-brand-border shadow-[6px_6px_0_#FF8A00] overflow-hidden min-h-[220px]">
                     <button 
                       onClick={handleCopy}
-                      className="absolute top-3 right-3 bg-brand-primary text-black px-3 py-1.5 hover:bg-white hover:text-black transition-all font-black uppercase text-[8px] border border-black z-10"
+                      className="absolute top-3 right-3 bg-brand-primary text-[#111111] px-3 py-1.5 hover:bg-[#F4F4F0] hover:text-[#111111] transition-all font-black uppercase text-[8px] border border-[#111111] z-10"
                     >
                       {copied ? 'Copied!' : 'Copy snippet'}
                     </button>
                     
-                    <pre className="mt-6 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[300px] overflow-y-auto text-white/90">
+                    <pre className="mt-6 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[300px] overflow-y-auto text-[#F4F4F0]">
                       <code>
                         {codeType === 'react' 
                           ? activeItem.react(selectedToken)
@@ -535,7 +535,7 @@ const Library = () => {
             </div>
 
             {/* Help / Workflow */}
-            <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,1)]">
+            <div className="bg-brand-card border-4 border-brand-border p-8 shadow-[8px_8px_0_var(--color-brand-shadow)]">
                <h3 className="text-xl font-black uppercase mb-6 tracking-tight">How to deploy live forms</h3>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <div className="space-y-1">

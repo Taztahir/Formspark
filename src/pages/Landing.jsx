@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Code, 
-  Shield, 
-  Webhook, 
-  Mail, 
-  Copy, 
-  LayoutTemplate, 
+import {
+  ArrowRight,
+  Code,
+  Shield,
+  Webhook,
+  Mail,
+  Copy,
+  LayoutTemplate,
   Terminal,
   MessageSquare,
   Check
@@ -42,15 +42,15 @@ const FeedbackLite = () => (
 const TypewriterCode = () => {
   const lines = [
     { text: '<form', color: 'text-brand-primary' },
-    { text: '  action="https://api.formspark.io/f/your-id"', color: 'text-brand-bg' },
-    { text: '  method="POST"', color: 'text-brand-bg' },
+    { text: '  action="https://formspark-five.vercel.app/submit/your-id"', color: 'text-[#F4F4F0]' },
+    { text: '  method="POST"', color: 'text-[#F4F4F0]' },
     { text: '>', color: 'text-brand-primary' },
-    { text: '  <input type="email" name="email" />', color: 'text-brand-bg' },
-    { text: '  <textarea name="message"></textarea>', color: 'text-brand-bg' },
-    { text: '  <button type="submit">Send</button>', color: 'text-brand-bg' },
+    { text: '  <input type="email" name="email" />', color: 'text-[#F4F4F0]' },
+    { text: '  <textarea name="message"></textarea>', color: 'text-[#F4F4F0]' },
+    { text: '  <button type="submit">Send</button>', color: 'text-[#F4F4F0]' },
     { text: '</form>', color: 'text-brand-primary' }
   ];
-  
+
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
 
@@ -75,18 +75,18 @@ const TypewriterCode = () => {
     <div className="font-mono text-[10px] sm:text-xs md:text-sm lg:text-base space-y-1.5 md:space-y-2">
       {lines.map((line, idx) => {
         if (idx > currentLineIndex) return null;
-        
-        const content = idx === currentLineIndex 
-          ? line.text.slice(0, currentCharIndex) 
+
+        const content = idx === currentLineIndex
+          ? line.text.slice(0, currentCharIndex)
           : line.text;
-          
+
         return (
           <div key={idx} className="flex gap-3 md:gap-4">
-            <span className="w-6 md:w-8 text-right opacity-20 select-none text-brand-bg">{(idx + 1).toString().padStart(2, '0')}</span>
+            <span className="w-6 md:w-8 text-right opacity-20 select-none text-[#F4F4F0]">{(idx + 1).toString().padStart(2, '0')}</span>
             <div className={`${line.color} font-bold whitespace-pre`}>
               {content}
               {idx === currentLineIndex && (
-                <motion.span 
+                <motion.span
                   animate={{ opacity: [1, 0] }}
                   transition={{ duration: 0.8, repeat: Infinity }}
                   className="inline-block w-1.5 h-3 md:w-2 md:h-4 bg-brand-primary ml-1 align-middle"
@@ -124,23 +124,23 @@ const Landing = () => {
 
       {/* Persistent Architectural Grid Background */}
       <div className="fixed inset-0 pointer-events-none z-[-1] opacity-[0.05] dark:opacity-[0.1]"
-           style={{
-             backgroundImage: 'radial-gradient(var(--color-brand-border) 1.5px, transparent 1.5px)',
-             backgroundSize: '40px 40px'
-           }}>
+        style={{
+          backgroundImage: 'radial-gradient(var(--color-brand-border) 1.5px, transparent 1.5px)',
+          backgroundSize: '40px 40px'
+        }}>
       </div>
 
       <main className="grid-container relative z-10 bg-brand-bg shadow-[0_0_100px_rgba(0,0,0,0.1)]">
         {/* Massive Background Text behind Hero */}
         <div className="absolute top-0 left-0 w-full overflow-hidden pointer-events-none opacity-5 dark:opacity-10 h-[85vh] flex items-center justify-center overflow-hidden">
-           <motion.h1 style={{ y: y1 }} className="text-[15vw] font-black tracking-tighter whitespace-nowrap leading-none select-none">
-             FORMSPARK
-           </motion.h1>
+          <motion.h1 style={{ y: y1 }} className="text-[15vw] font-black tracking-tighter whitespace-nowrap leading-none select-none">
+            FORMSPARK
+          </motion.h1>
         </div>
 
         {/* Hero Section */}
         <section className="grid-section min-h-[70vh] flex flex-col xl:flex-row overflow-hidden relative">
-          <motion.div 
+          <motion.div
             initial="hidden"
             animate="visible"
             variants={staggerContainer}
@@ -149,17 +149,17 @@ const Landing = () => {
             <div>
               <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 border border-brand-primary text-brand-primary text-xs font-black uppercase tracking-widest mb-12">
                 <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
-                System Operational
+                Formspark
               </motion.div>
               <motion.h1 variants={fadeInUp} className="text-[10vw] xl:text-[5vw] leading-[0.85] mb-8 mt-4 tracking-tighter uppercase font-black">
-                FORMS.<br/>
+                FORMS.<br />
                 <span className="text-brand-primary">SOLVED.</span>
               </motion.h1>
               <motion.p variants={fadeInUp} className="text-lg md:text-xl font-bold max-w-lg leading-snug opacity-80">
                 The developer-first form backend. Build your custom UI, point your action to our API, and we handle the spam, emails, and integrations.
               </motion.p>
             </div>
-            
+
             <motion.div variants={fadeInUp} className="mt-16 flex flex-col sm:flex-row gap-6">
               <Link to="/signup">
                 <Button size="lg" icon={ArrowRight}>Get Your Endpoint</Button>
@@ -169,30 +169,30 @@ const Landing = () => {
               </Link>
             </motion.div>
           </motion.div>
-          
+
           {/* Hero Visual - Code Only */}
           <div className="w-full xl:w-1/2 flex flex-col relative z-10 bg-brand-bg/90">
-            <motion.div 
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="flex-1 border-brand-border bg-brand-text text-brand-bg p-8 flex flex-col justify-center relative overflow-hidden group"
+              className="flex-1 border-brand-border bg-[#111111] text-[#F4F4F0] p-8 flex flex-col justify-center relative overflow-hidden group"
             >
               <div className="absolute top-4 right-4 text-brand-primary font-bold flex items-center gap-2">
                 <Terminal size={16} /> 01_CODE
               </div>
-              
+
               {/* Interactive Typing Code */}
               <div className="scale-110">
                 <TypewriterCode />
               </div>
-              
+
               {/* Decorative grid in code block */}
               <div className="absolute inset-0 opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none"
-                   style={{
-                     backgroundImage: 'radial-gradient(var(--color-brand-primary) 1.5px, transparent 1.5px)',
-                     backgroundSize: '30px 30px'
-                   }}>
+                style={{
+                  backgroundImage: 'radial-gradient(var(--color-brand-primary) 1.5px, transparent 1.5px)',
+                  backgroundSize: '30px 30px'
+                }}>
               </div>
             </motion.div>
           </div>
@@ -203,8 +203,8 @@ const Landing = () => {
           <motion.div style={{ y: y2 }} className="absolute -left-20 top-40 text-[15vw] font-black opacity-5 pointer-events-none select-none text-brand-text transform -rotate-90">
             COMPONENTS
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -221,8 +221,8 @@ const Landing = () => {
               <Button variant="secondary" icon={Copy} className="bg-brand-bg text-brand-text">Browse All Components</Button>
             </Link>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -230,21 +230,21 @@ const Landing = () => {
             className="grid grid-cols-1 md:grid-cols-3 relative z-10"
           >
             {[
-              { 
-                name: 'Waitlist Form', 
-                desc: 'Get emails for your next launch.', 
+              {
+                name: 'Waitlist Form',
+                desc: 'Get emails for your next launch.',
                 preview: <WaitlistLite />,
                 code: `<form className="flex border-2 border-black">\n  <input type="email" placeholder="Email" />\n  <button>JOIN</button>\n</form>`
               },
-              { 
-                name: 'Simple Contact', 
-                desc: 'A clean way for users to message you.', 
+              {
+                name: 'Simple Contact',
+                desc: 'A clean way for users to message you.',
                 preview: <ContactLite />,
                 code: `<form className="space-y-4">\n  <input type="text" placeholder="Name" />\n  <textarea placeholder="Message" />\n  <button>SEND</button>\n</form>`
               },
-              { 
-                name: 'Feedback Box', 
-                desc: 'Hear what your users think.', 
+              {
+                name: 'Feedback Box',
+                desc: 'Hear what your users think.',
                 preview: <FeedbackLite />,
                 code: `<form className="p-6 border-2 border-black">\n  <textarea placeholder="Feedback" />\n  <button>SUBMIT</button>\n</form>`
               },
@@ -259,14 +259,14 @@ const Landing = () => {
               };
 
               return (
-                <motion.div 
-                  variants={fadeInUp} 
-                  key={i} 
+                <motion.div
+                  variants={fadeInUp}
+                  key={i}
                   onClick={handleCopy}
                   className="card-editorial group cursor-pointer relative overflow-hidden bg-brand-bg hover:bg-brand-primary min-h-[400px] lg:h-[400px]"
                 >
                   <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0iIzExMSIgZmlsbC1vcGFjaXR5PSIwLjEiLz48L3N2Zz4=')] opacity-50 dark:invert transition-opacity group-hover:opacity-10"></div>
-                  
+
                   {/* Visual Preview Area */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-12 transition-transform duration-500 group-hover:-translate-y-8">
                     <div className="w-full flex justify-center">
@@ -279,7 +279,7 @@ const Landing = () => {
                   </div>
 
                   {/* Code Reveal Overlay on Hover */}
-                  <div className="absolute inset-0 bg-brand-text p-8 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] z-20 flex flex-col justify-center">
+                  <div className="absolute inset-0 bg-[#111111] p-8 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] z-20 flex flex-col justify-center">
                     <pre className="text-brand-primary font-mono text-[10px] leading-relaxed overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity delay-200">
                       {component.code}
                     </pre>
@@ -305,22 +305,22 @@ const Landing = () => {
 
         {/* Backend Features Section */}
         <section id="backend" className="grid-section">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="border-b border-brand-border p-8 md:p-16 bg-brand-text text-brand-bg relative overflow-hidden"
+            className="border-b border-brand-border p-8 md:p-16 bg-brand-card text-brand-text relative overflow-hidden transition-colors duration-500"
           >
-             {/* Decorative abstract circle */}
-             <div className="absolute -right-40 -top-40 w-96 h-96 border-[40px] border-brand-primary rounded-full opacity-20 pointer-events-none"></div>
+            {/* Decorative abstract circle */}
+            <div className="absolute -right-40 -top-40 w-96 h-96 border-[40px] border-brand-primary rounded-full opacity-20 pointer-events-none"></div>
 
             <h2 className="text-4xl md:text-6xl font-black text-brand-primary relative z-10 uppercase tracking-tighter">Backend_</h2>
-            <p className="text-lg md:text-2xl font-bold max-w-2xl mt-4 text-brand-bg relative z-10 opacity-80">
+            <p className="text-lg md:text-2xl font-bold max-w-2xl mt-4 relative z-10 opacity-80">
               Your HTML handles the UI. Our API handles the heavy lifting.
             </p>
           </motion.div>
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -346,7 +346,7 @@ const Landing = () => {
 
         {/* Pricing Section */}
         <section id="pricing" className="grid-section">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -356,25 +356,48 @@ const Landing = () => {
             <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">Pricing_</h2>
             <div className="hidden md:block w-20 h-20 border-4 border-brand-primary rounded-full animate-[spin_10s_linear_infinite] border-t-transparent"></div>
           </motion.div>
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3"
+            className="grid grid-cols-1 md:grid-cols-2"
           >
             {[
-              { name: 'DEV', price: '$0', desc: '250 submissions/mo. Unlimited forms. UI Library access.', btn: 'secondary' },
-              { name: 'PRO', price: '$15', desc: '5,000 submissions/mo. Webhooks. Auto-responders. Remove branding.', btn: 'primary' },
-              { name: 'AGENCY', price: '$49', desc: 'Unlimited submissions. Priority support. Custom domains.', btn: 'secondary' },
+              {
+                name: 'Community Cloud',
+                price: '$0',
+                desc: 'Unlimited forms & submissions. Includes webhooks, auto-responders, advanced spam filters, and full UI Library access. Hosted free on our server.',
+                btn: 'primary',
+                actionText: 'Procure Architecture',
+                link: '/signup',
+                isExternal: false
+              },
+              {
+                name: 'Self-Hosted',
+                price: '$0',
+                desc: 'Deploy Formspark on your own server. Fully open source, customizable environment, unlimited domains, Postgres native integration.',
+                btn: 'secondary',
+                actionText: 'Deploy Instantly',
+                link: 'https://github.com',
+                isExternal: true
+              },
             ].map((plan, i) => (
-              <motion.div variants={fadeInUp} key={i} className="border-r border-brand-border last:border-r-0 p-8 md:p-16 flex flex-col group hover:bg-brand-text hover:text-brand-bg transition-colors duration-500">
+              <motion.div variants={fadeInUp} key={i} className="border-r border-brand-border last:border-r-0 p-8 md:p-16 flex flex-col group hover:bg-[#111111] hover:text-[#F4F4F0] transition-colors duration-500">
                 <h3 className="text-3xl font-black mb-4 uppercase tracking-widest opacity-50 group-hover:opacity-100 group-hover:text-brand-primary">{plan.name}</h3>
                 <div className="text-7xl font-black mb-8 flex items-end gap-2">
                   {plan.price}<span className="text-2xl opacity-50 mb-2">/MO</span>
                 </div>
                 <p className="text-xl font-bold mb-12 flex-1">{plan.desc}</p>
-                <Button variant={plan.btn} className="w-full group-hover:bg-brand-primary group-hover:text-brand-text group-hover:border-transparent group-hover:shadow-[8px_8px_0_#fff] dark:group-hover:shadow-[8px_8px_0_#000]">Procure Architecture</Button>
+                {plan.isExternal ? (
+                  <a href={plan.link} target="_blank" rel="noopener noreferrer" className="w-full">
+                    <Button variant={plan.btn} className="w-full group-hover:bg-brand-primary group-hover:text-[#111111] group-hover:border-transparent group-hover:shadow-[8px_8px_0_var(--color-brand-bg)]">{plan.actionText}</Button>
+                  </a>
+                ) : (
+                  <Link to={plan.link} className="w-full">
+                    <Button variant={plan.btn} className="w-full group-hover:bg-brand-primary group-hover:text-[#111111] group-hover:border-transparent group-hover:shadow-[8px_8px_0_var(--color-brand-bg)]">{plan.actionText}</Button>
+                  </Link>
+                )}
               </motion.div>
             ))}
           </motion.div>
@@ -382,12 +405,12 @@ const Landing = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-brand-border bg-brand-text text-brand-bg pt-20 pb-12 relative z-10 overflow-hidden">
+      <footer className="border-t border-brand-border bg-brand-card text-brand-text pt-20 pb-12 relative z-10 overflow-hidden transition-colors duration-500">
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none"
-             style={{
-               backgroundImage: 'linear-gradient(var(--color-brand-primary) 2px, transparent 2px), linear-gradient(90deg, var(--color-brand-primary) 2px, transparent 2px)',
-               backgroundSize: '40px 40px'
-             }}>
+          style={{
+            backgroundImage: 'linear-gradient(var(--color-brand-primary) 2px, transparent 2px), linear-gradient(90deg, var(--color-brand-primary) 2px, transparent 2px)',
+            backgroundSize: '40px 40px'
+          }}>
         </div>
         <div className="max-w-[1400px] mx-auto px-8 grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
           <div>

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getFormByToken, updateForm, deleteForm } from '../services/formsService';
 import { getTeamMembers, inviteMember, updateMemberRole, removeMember } from '../services/teamService';
 import { getApiKey, generateApiKey, deleteApiKey } from '../services/apiKeyService';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase'; // used for team/webhook/api-key operations
 import Sidebar from '../components/layout/Sidebar';
 import toast from 'react-hot-toast';
 
@@ -16,15 +16,15 @@ const useDocumentTitle = (title) => {
 
 // Safe SVGs
 const CopyIcon = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
 );
 
 const TrashIcon = () => (
-  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
 );
 
 const AlertIcon = () => (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12" y1="17" y2="17"/></svg>
+  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12" y1="17" y2="17"/></svg>
 );
 
 const FormSettings = () => {
@@ -43,6 +43,7 @@ const FormSettings = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [notificationEmail, setNotificationEmail] = useState('');
   const [savingNotifications, setSavingNotifications] = useState(false);
+  
 
   // Redirects state
   const [redirectUrl, setRedirectUrl] = useState('');
@@ -137,7 +138,7 @@ const FormSettings = () => {
 
   // Section Save actions
   const saveGeneral = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (name.length < 3) return toast.error('Name must be at least 3 characters');
     setSavingGeneral(true);
     try {
@@ -152,7 +153,7 @@ const FormSettings = () => {
   };
 
   const saveNotifications = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSavingNotifications(true);
     try {
       const updated = await updateForm(token, {
@@ -169,7 +170,7 @@ const FormSettings = () => {
   };
 
   const saveRedirects = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSavingRedirects(true);
     try {
       const updated = await updateForm(token, { redirect_url: redirectUrl });
@@ -183,7 +184,7 @@ const FormSettings = () => {
   };
 
   const saveSecurity = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSavingSecurity(true);
     try {
       const originsArray = allowedOrigins.split(',').map(s => s.trim()).filter(Boolean);
@@ -204,7 +205,7 @@ const FormSettings = () => {
   };
 
   const saveWebhooks = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSavingWebhooks(true);
     try {
       const updated = await updateForm(token, {
@@ -324,33 +325,36 @@ const FormSettings = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#F5F5F5]">
-        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent animate-spin"></div>
+      <div className="flex h-screen items-center justify-center bg-brand-bg text-brand-text">
+        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent animate-spin rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-[#F5F5F5] font-sans overflow-hidden">
-      <Sidebar />
+    <div className="flex flex-col lg:flex-row h-screen bg-brand-bg text-brand-text font-sans overflow-hidden transition-colors duration-500 relative">
+      {/* Dynamic Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-bg via-brand-bg to-brand-primary/10 pointer-events-none z-0"></div>
+
+      <Sidebar className="z-10 relative" />
       
-      <main className="flex-1 flex flex-col overflow-y-auto">
+      <main className="flex-1 flex flex-col overflow-y-auto relative z-10">
         {/* Header */}
-        <header className="h-20 bg-white border-b border-black/5 flex items-center justify-between px-6 md:px-10 shrink-0">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard" className="text-[11px] font-black uppercase text-black/40 hover:text-black transition-colors">Dashboard</Link>
-            <span className="text-black/20">/</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-brand-primary border-b-2 border-brand-primary pb-7 mt-7">
+        <header className="h-24 bg-brand-bg/60 backdrop-blur-xl border-b border-brand-border/10 flex items-center justify-between px-8 md:px-12 shrink-0 transition-colors duration-500 sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <Link to="/dashboard" className="text-xs font-semibold text-brand-muted hover:text-brand-text transition-colors">Dashboard</Link>
+            <span className="text-brand-muted/30">/</span>
+            <span className="text-xs font-bold text-brand-primary">
               Configuration
             </span>
           </div>
         </header>
 
         {/* Content Panel */}
-        <div className="p-6 md:p-10 max-w-4xl space-y-12 pb-24">
+        <div className="p-8 md:p-12 max-w-4xl space-y-10 pb-24 relative z-10 w-full">
           <div>
-            <h1 className="text-4xl font-black uppercase tracking-tighter">Endpoint Configuration</h1>
-            <p className="text-[13px] font-bold text-black/50 mt-1">Configure your form endpoint, integrations, webhooks, and team access.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-brand-text bg-clip-text text-transparent bg-gradient-to-r from-brand-text to-brand-primary">Endpoint Configuration</h1>
+            <p className="text-sm font-medium text-brand-muted mt-2">Configure your form endpoint, integrations, webhooks, and team access.</p>
           </div>
 
           {/* GENERAL SECTION */}
@@ -360,30 +364,30 @@ const FormSettings = () => {
             onSubmit={saveGeneral}
             saving={savingGeneral}
           >
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Form Name</label>
+                <label className="text-xs font-bold block mb-2 text-brand-text">Form Name</label>
                 <input 
                   type="text"
                   required
-                  className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs rounded-none transition-colors"
+                  className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Form Token (Monospace Identifier)</label>
-                <div className="flex gap-2">
+                <label className="text-xs font-bold block mb-2 text-brand-text">Form Token (Monospace Identifier)</label>
+                <div className="flex gap-4">
                   <input 
                     type="text"
                     readOnly
-                    className="flex-1 bg-black/[0.02] border-2 border-dashed border-black/10 px-4 py-2.5 outline-none font-mono text-[10px] text-black/50 rounded-none"
+                    className="flex-1 bg-brand-bg/85 border border-brand-border/15 rounded-2xl px-5 py-4 outline-none font-mono text-xs text-brand-muted"
                     value={form?.token || ''}
                   />
                   <button 
                     type="button"
                     onClick={() => { navigator.clipboard.writeText(form?.token); toast.success('Token copied!'); }}
-                    className="px-4 border-2 border-black hover:bg-black hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider flex items-center gap-2"
+                    className="px-6 bg-brand-primary text-brand-bg rounded-2xl font-bold text-xs flex items-center gap-2 hover:opacity-90 transition-all shadow-md shrink-0"
                   >
                     <CopyIcon />
                     Copy
@@ -400,15 +404,18 @@ const FormSettings = () => {
             onSubmit={saveNotifications}
             saving={savingNotifications}
           >
-            <div className="space-y-4">
-              <label className="flex items-center justify-between cursor-pointer border border-black/5 p-3 hover:bg-black/[0.01]">
+            <div className="space-y-6">
+              <label className="flex items-center justify-between cursor-pointer border border-brand-border/10 rounded-2xl p-5 hover:bg-brand-bg/50 transition-all bg-brand-card/50">
                 <div>
-                  <p className="text-[10px] font-black uppercase text-brand-text">Enable Email Alerts</p>
-                  <p className="text-[8px] text-black/40 font-bold uppercase tracking-widest">Receive automated emails for every submit event</p>
+                  <p className="text-sm font-bold text-brand-text">Enable Email Alerts</p>
+                  <p className="text-xs text-brand-muted font-medium mt-1">Receive automated emails for every submit event</p>
+                </div>
+                <div className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${emailNotifications ? 'bg-brand-primary' : 'bg-brand-border/20'}`}>
+                   <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${emailNotifications ? 'translate-x-6' : 'translate-x-0'}`}></div>
                 </div>
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded-sm border-black text-brand-primary focus:ring-brand-primary accent-brand-primary"
+                  className="hidden"
                   checked={emailNotifications}
                   onChange={(e) => setEmailNotifications(e.target.checked)}
                 />
@@ -416,17 +423,18 @@ const FormSettings = () => {
 
               {emailNotifications && (
                 <div>
-                  <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Recipient Notification Email</label>
+                  <label className="text-xs font-bold block mb-2 text-brand-text">Recipient Notification Email</label>
                   <input 
                     type="email"
                     required
                     placeholder="Enter email to notify"
-                    className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs rounded-none transition-colors"
+                    className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all"
                     value={notificationEmail}
                     onChange={(e) => setNotificationEmail(e.target.value)}
                   />
                 </div>
               )}
+
             </div>
           </SettingsSection>
 
@@ -438,11 +446,11 @@ const FormSettings = () => {
             saving={savingRedirects}
           >
             <div>
-              <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Custom Redirect URL</label>
+              <label className="text-xs font-bold block mb-2 text-brand-text">Custom Redirect URL</label>
               <input 
                 type="url"
                 placeholder="https://mysite.com/thank-you"
-                className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs rounded-none transition-colors"
+                className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all"
                 value={redirectUrl}
                 onChange={(e) => setRedirectUrl(e.target.value)}
               />
@@ -456,36 +464,39 @@ const FormSettings = () => {
             onSubmit={saveSecurity}
             saving={savingSecurity}
           >
-            <div className="space-y-4">
-              <label className="flex items-center justify-between cursor-pointer border border-black/5 p-3 hover:bg-black/[0.01]">
+            <div className="space-y-6">
+              <label className="flex items-center justify-between cursor-pointer border border-brand-border/10 rounded-2xl p-5 hover:bg-brand-bg/50 transition-all bg-brand-card/50">
                 <div>
-                  <p className="text-[10px] font-black uppercase text-brand-text">Enable Spam Filter (CAPTCHA / Bots)</p>
-                  <p className="text-[8px] text-black/40 font-bold uppercase tracking-widest">Intercept automated robot submits with honey-pot algorithms</p>
+                  <p className="text-sm font-bold text-brand-text">Enable Spam Filter (CAPTCHA / Bots)</p>
+                  <p className="text-xs text-brand-muted font-medium mt-1">Intercept automated robot submits with honey-pot algorithms</p>
+                </div>
+                <div className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${spamProtection ? 'bg-brand-primary' : 'bg-brand-border/20'}`}>
+                   <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${spamProtection ? 'translate-x-6' : 'translate-x-0'}`}></div>
                 </div>
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded-sm border-black text-brand-primary focus:ring-brand-primary accent-brand-primary"
+                  className="hidden"
                   checked={spamProtection}
                   onChange={(e) => setSpamProtection(e.target.checked)}
                 />
               </label>
 
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Allowed Origin CORS Domains (Comma Separated)</label>
+                <label className="text-xs font-bold block mb-2 text-brand-text">Allowed Origin CORS Domains (Comma Separated)</label>
                 <input 
                   type="text"
                   placeholder="e.g. https://domain.com, http://localhost:3000"
-                  className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs rounded-none transition-colors"
+                  className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all placeholder-brand-muted"
                   value={allowedOrigins}
                   onChange={(e) => setAllowedOrigins(e.target.value)}
                 />
               </div>
 
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Blacklisted Submission Keywords (Comma Separated)</label>
+                <label className="text-xs font-bold block mb-2 text-brand-text">Blacklisted Submission Keywords (Comma Separated)</label>
                 <textarea 
                   placeholder="e.g. crypto, viagra, bot, promo"
-                  className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs rounded-none min-h-[80px] transition-colors"
+                  className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm min-h-[100px] transition-all placeholder-brand-muted"
                   value={spamBlacklist}
                   onChange={(e) => setSpamBlacklist(e.target.value)}
                 />
@@ -500,38 +511,41 @@ const FormSettings = () => {
             onSubmit={saveWebhooks}
             saving={savingWebhooks}
           >
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Payload Delivery Webhook URL</label>
+                <label className="text-xs font-bold block mb-2 text-brand-text">Payload Delivery Webhook URL</label>
                 <input 
                   type="url"
                   placeholder="https://api.thirdparty.com/webhook"
-                  className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-brand-primary font-bold text-xs rounded-none transition-colors"
+                  className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all placeholder-brand-muted"
                   value={webhookUrl}
                   onChange={(e) => setWebhookUrl(e.target.value)}
                 />
               </div>
 
               {webhookUrl && (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                  <label className="flex items-center gap-3 cursor-pointer">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-2">
+                  <label className="flex items-center justify-between cursor-pointer border border-brand-border/10 rounded-2xl p-5 hover:bg-brand-bg/50 transition-all bg-brand-card/50 flex-1">
+                    <div>
+                      <p className="text-sm font-bold text-brand-text">HMAC Signature Header validation</p>
+                      <p className="text-xs text-brand-muted font-medium mt-1">Secures hook payloads with verify tokens</p>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${webhookSignatureEnabled ? 'bg-brand-primary' : 'bg-brand-border/20'}`}>
+                       <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-300 ${webhookSignatureEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </div>
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded-sm border-black text-brand-primary focus:ring-brand-primary accent-brand-primary"
+                      className="hidden"
                       checked={webhookSignatureEnabled}
                       onChange={(e) => setWebhookSignatureEnabled(e.target.checked)}
                     />
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-brand-text">HMAC Signature Header validation</p>
-                      <p className="text-[8px] text-black/40 font-bold uppercase tracking-widest">Secures hook payloads with verify tokens</p>
-                    </div>
                   </label>
 
                   <button
                     type="button"
                     onClick={handleTestWebhook}
                     disabled={testingWebhook}
-                    className="border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-brand-text px-4 py-2 text-[9px] font-black uppercase tracking-widest disabled:opacity-50 transition-colors shrink-0"
+                    className="px-5 py-4 rounded-2xl border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-brand-bg font-bold text-xs transition-all disabled:opacity-50 shrink-0"
                   >
                     {testingWebhook ? 'Dispatching...' : 'Test Webhook Destination'}
                   </button>
@@ -541,29 +555,29 @@ const FormSettings = () => {
           </SettingsSection>
 
           {/* TEAM ROSTER SECTION */}
-          <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,1)] space-y-6">
+          <div className="bg-brand-card/60 backdrop-blur-xl border border-brand-border/10 rounded-3xl p-8 shadow-sm space-y-6">
             <div>
-              <h3 className="text-[11px] font-black uppercase tracking-widest">Authorized Team Members</h3>
-              <p className="text-[9px] font-bold text-black/40 uppercase mt-1 tracking-wider">Share this form endpoint with other developer profiles.</p>
+              <h3 className="text-lg font-bold tracking-tight text-brand-text">Authorized Team Members</h3>
+              <p className="text-xs font-medium text-brand-muted mt-1">Share this form endpoint with other developer profiles.</p>
             </div>
 
             {/* Invite Form */}
-            <form onSubmit={handleInvite} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end pt-2">
+            <form onSubmit={handleInvite} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end pt-2">
               <div className="sm:col-span-1">
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Invite email</label>
+                <label className="text-xs font-bold block mb-2 text-brand-text">Invite email</label>
                 <input 
                   type="email"
                   required
                   placeholder="colleague@domain.com"
-                  className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2 outline-none focus:border-brand-primary font-bold text-xs rounded-none transition-colors"
+                  className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all placeholder-brand-muted"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
               </div>
               <div>
-                <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">Role</label>
+                <label className="text-xs font-bold block mb-2 text-brand-text">Role</label>
                 <select 
-                  className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2 outline-none focus:border-brand-primary font-bold text-xs rounded-none"
+                  className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 text-brand-text font-medium text-sm transition-all"
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
                 >
@@ -575,7 +589,7 @@ const FormSettings = () => {
               <button
                 type="submit"
                 disabled={inviting}
-                className="w-full bg-black hover:bg-brand-primary text-white hover:text-brand-text border-2 border-black py-2.5 text-[9px] font-black uppercase tracking-widest disabled:opacity-50 transition-colors text-center"
+                className="w-full bg-brand-text text-brand-bg rounded-full py-4 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
               >
                 {inviting ? 'Inviting...' : 'Invite Member'}
               </button>
@@ -583,18 +597,18 @@ const FormSettings = () => {
 
             {/* Members List */}
             {fetchingTeam ? (
-              <p className="text-[10px] font-black uppercase text-black/30 animate-pulse">Loading team members...</p>
+              <p className="text-xs font-semibold text-brand-muted animate-pulse">Loading team members...</p>
             ) : (
-              <div className="border border-black/5 divide-y divide-black/5">
+              <div className="space-y-3 pt-4">
                 {teamMembers.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-4 bg-[#FAF9F5]">
+                  <div key={member.id} className="flex items-center justify-between p-5 bg-brand-bg/40 hover:bg-brand-bg/70 border border-brand-border/10 rounded-2xl transition-all">
                     <div>
-                      <p className="text-[11px] font-black uppercase tracking-tight">{member.profiles?.name || 'Pending Invite'}</p>
-                      <p className="text-[9px] font-bold text-black/45">{member.profiles?.email || 'No email associated'}</p>
+                      <p className="text-sm font-bold text-brand-text">{member.profiles?.name || 'Pending Invite'}</p>
+                      <p className="text-xs text-brand-muted mt-0.5">{member.profiles?.email || 'No email associated'}</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <select
-                        className="bg-transparent border-none text-[10px] font-black uppercase text-brand-primary py-1 focus:outline-none"
+                        className="bg-transparent border-none text-xs font-bold text-brand-primary py-1 focus:outline-none cursor-pointer"
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.id, e.target.value)}
                       >
@@ -606,7 +620,7 @@ const FormSettings = () => {
                       <button
                         type="button"
                         onClick={() => handleRemoveMember(member.id)}
-                        className="text-black/30 hover:text-red-500 p-2"
+                        className="text-brand-muted hover:text-red-500 hover:bg-red-500/10 p-2.5 rounded-xl transition-all"
                         title="Remove member"
                       >
                         <TrashIcon />
@@ -616,59 +630,59 @@ const FormSettings = () => {
                 ))}
 
                 {teamMembers.length === 0 && (
-                  <p className="text-[10px] text-black/35 font-bold uppercase py-4 text-center">No additional team members invited yet.</p>
+                  <p className="text-xs text-brand-muted font-medium py-4 text-center">No additional team members invited yet.</p>
                 )}
               </div>
             )}
           </div>
 
           {/* DEVELOPER API KEYS SECTION */}
-          <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,1)] space-y-6">
+          <div className="bg-brand-card/60 backdrop-blur-xl border border-brand-border/10 rounded-3xl p-8 shadow-sm space-y-6">
             <div>
-              <h3 className="text-[11px] font-black uppercase tracking-widest">Developer Integration Access Keys</h3>
-              <p className="text-[9px] font-bold text-black/40 uppercase mt-1 tracking-wider">Configure your secret API tokens for command line and script integrations.</p>
+              <h3 className="text-lg font-bold tracking-tight text-brand-text">Developer Integration Access Keys</h3>
+              <p className="text-xs font-medium text-brand-muted mt-1">Configure your secret API tokens for command line and script integrations.</p>
             </div>
 
             {fetchingApiKey ? (
-              <p className="text-[10px] font-black uppercase text-black/30 animate-pulse">Checking credentials...</p>
+              <p className="text-xs font-semibold text-brand-muted animate-pulse">Checking credentials...</p>
             ) : apiKey ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
                   <div className="flex-1 relative">
                     <input 
                       type={showApiKey ? "text" : "password"}
                       readOnly
-                      className="w-full bg-[#111] text-white border-2 border-black px-4 py-2.5 outline-none font-mono text-[10px] rounded-none select-all"
+                      className="w-full bg-brand-bg/85 border border-brand-border/15 rounded-2xl px-5 py-4 outline-none font-mono text-xs text-brand-muted select-all"
                       value={apiKey.id}
                     />
                   </div>
                   <button 
                     type="button"
                     onClick={() => { navigator.clipboard.writeText(apiKey.id); toast.success('API Key copied!'); }}
-                    className="px-4 py-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors text-[9px] font-black uppercase"
+                    className="px-5 py-3 border border-brand-border/20 hover:bg-brand-text/5 text-brand-text font-bold text-xs rounded-2xl transition-all shrink-0"
                   >
                     Copy Key
                   </button>
                   <button 
                     type="button"
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="px-4 py-2.5 border-2 border-black hover:bg-black hover:text-white transition-colors text-[9px] font-black uppercase"
+                    className="px-5 py-3 border border-brand-border/20 hover:bg-brand-text/5 text-brand-text font-bold text-xs rounded-2xl transition-all shrink-0"
                   >
                     {showApiKey ? 'Hide' : 'Reveal'}
                   </button>
                 </div>
                 
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                   <button 
                     onClick={handleGenerateApiKey}
                     disabled={generatingApiKey}
-                    className="bg-[#111] hover:bg-brand-primary text-white hover:text-brand-text border-2 border-black px-5 py-2.5 text-[9px] font-black uppercase tracking-widest disabled:opacity-50 transition-colors"
+                    className="bg-brand-primary text-brand-bg rounded-2xl px-6 py-3.5 font-bold text-xs hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
                   >
                     {generatingApiKey ? 'Generating...' : 'Re-Generate API Key'}
                   </button>
                   <button 
                     onClick={handleRevokeApiKey}
-                    className="border-2 border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 px-5 py-2.5 text-[9px] font-black uppercase tracking-widest transition-colors"
+                    className="border border-red-500/30 text-red-500 bg-red-500/10 hover:bg-red-500 hover:text-white rounded-2xl px-6 py-3.5 font-bold text-xs transition-all"
                   >
                     Revoke API Key
                   </button>
@@ -676,11 +690,11 @@ const FormSettings = () => {
               </div>
             ) : (
               <div>
-                <p className="text-[10px] text-black/40 font-bold uppercase mb-4">No developer API keys active for this profile.</p>
+                <p className="text-xs font-medium text-brand-muted mb-4">No developer API keys active for this profile.</p>
                 <button 
                   onClick={handleGenerateApiKey}
                   disabled={generatingApiKey}
-                  className="bg-brand-primary text-brand-text border-2 border-black px-6 py-3 font-black uppercase tracking-widest text-[9px] hover:bg-[#e67c00] transition-colors shadow-[4px_4px_0_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                  className="bg-brand-primary text-brand-bg rounded-2xl px-6 py-3.5 font-bold text-xs hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
                 >
                   {generatingApiKey ? 'Generating...' : 'Generate Secret Developer Key'}
                 </button>
@@ -689,10 +703,10 @@ const FormSettings = () => {
           </div>
 
           {/* DANGER ZONE SECTION */}
-          <div className="border-4 border-red-500 bg-red-50 p-8 shadow-[8px_8px_0_rgba(220,38,38,0.1)] space-y-6">
+          <div className="bg-red-500/5 border border-red-500/20 rounded-3xl p-8 space-y-6">
             <div>
-              <h3 className="text-xl font-black uppercase tracking-tight text-red-600">Danger Zone</h3>
-              <p className="text-[9px] font-bold text-red-600/60 uppercase tracking-widest mt-1">Permanently discard this form endpoint and all collected responses.</p>
+              <h3 className="text-lg font-bold text-red-500 tracking-tight">Danger Zone</h3>
+              <p className="text-xs font-medium text-red-500/70 mt-1">Permanently discard this form endpoint and all collected responses.</p>
             </div>
             
             <div className="pt-2">
@@ -702,7 +716,7 @@ const FormSettings = () => {
                   setDeleteConfirmName('');
                   setShowDeleteModal(true);
                 }}
-                className="bg-red-600 hover:bg-red-700 text-white border-2 border-black px-6 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                className="bg-red-500 hover:bg-red-600 text-white rounded-2xl px-8 py-4 font-bold text-sm hover:shadow-xl hover:shadow-red-500/10 transition-all"
               >
                 Delete Form Permanently
               </button>
@@ -715,58 +729,59 @@ const FormSettings = () => {
       <AnimatePresence>
         {showDeleteModal && form && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-brand-bg/80 backdrop-blur-md" onClick={() => setShowDeleteModal(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 15 }}
-              className="bg-white w-full max-w-md relative z-10 p-8 border-4 border-red-500 shadow-[12px_12px_0_rgba(0,0,0,1)]"
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-brand-card/90 backdrop-blur-2xl w-full max-w-lg relative z-10 p-10 border border-red-500/20 rounded-[32px] shadow-2xl shadow-red-500/10"
             >
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="absolute top-4 right-4 text-black/50 hover:text-black font-black text-lg transition-colors"
+                className="absolute top-6 right-6 text-brand-muted hover:text-brand-text font-bold text-xl transition-colors p-2"
               >
                 ✕
               </button>
 
-              <div className="flex items-center gap-3 mb-4">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
                 <AlertIcon />
-                <h2 className="text-2xl font-black uppercase tracking-tighter text-red-500">Delete Form</h2>
               </div>
+              
+              <h2 className="text-3xl font-bold tracking-tight text-red-500 mb-4">Delete Form</h2>
 
-              <p className="text-xs font-bold text-black/60 mb-6 uppercase tracking-wider leading-relaxed">
-                This will permanently delete <span className="text-black font-black">{form.name}</span> and all associated submissions. <span className="text-red-500 font-black">This action cannot be undone.</span>
+              <p className="text-sm font-medium text-brand-text mb-8 leading-relaxed">
+                This will permanently delete <span className="font-bold">{form.name}</span> and all associated submissions. <span className="text-red-500 font-bold">This action cannot be undone.</span>
               </p>
 
-              <form onSubmit={handleFormDelete} className="space-y-4">
+              <form onSubmit={handleFormDelete} className="space-y-6">
                 <div>
-                  <label className="text-[9px] font-black uppercase tracking-widest block mb-2 text-black/70">
-                    Type <span className="font-black text-black select-all">"{form.name}"</span> to confirm
+                  <label className="text-xs font-bold block mb-2 text-brand-text">
+                    Type <span className="font-mono bg-brand-bg px-2 py-1 rounded text-red-500 select-all">{form.name}</span> to confirm
                   </label>
                   <input
                     type="text"
                     required
                     placeholder="Enter form name exactly"
-                    className="w-full bg-[#F5F5F5] border-2 border-black px-4 py-2.5 outline-none focus:border-red-500 font-bold text-xs transition-colors rounded-none"
+                    className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/10 text-brand-text font-medium text-sm transition-all"
                     value={deleteConfirmName}
                     onChange={(e) => setDeleteConfirmName(e.target.value)}
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 border-2 border-black py-3 font-black uppercase tracking-widest text-[10px] hover:bg-black/5 transition-colors text-center"
+                    className="flex-1 border border-brand-border/20 rounded-full text-brand-text py-4 font-bold text-sm hover:bg-brand-text/5 transition-all text-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={deletingForm || deleteConfirmName !== form.name}
-                    className="flex-1 bg-red-500 text-white border-2 border-red-500 py-3 font-black uppercase tracking-widest text-[10px] hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-red-500 text-white rounded-full py-4 font-bold text-sm hover:bg-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-red-500/20"
                   >
-                    {deletingForm ? 'Deleting...' : 'Delete'}
+                    {deletingForm ? 'Deleting...' : 'Yes, Delete Form'}
                   </button>
                 </div>
               </form>
@@ -780,22 +795,22 @@ const FormSettings = () => {
 
 // Isolated card styling for setting segments with save action
 const SettingsSection = ({ title, description, onSubmit, saving, children }) => (
-  <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,1)]">
+  <div className="bg-brand-card/60 backdrop-blur-xl border border-brand-border/10 rounded-3xl p-8 shadow-sm">
     <div className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
       <div>
-        <h3 className="text-[11px] font-black uppercase tracking-widest">{title}</h3>
-        <p className="text-[9px] font-bold text-black/40 uppercase mt-1 tracking-wider">{description}</p>
+        <h3 className="text-lg font-bold tracking-tight text-brand-text">{title}</h3>
+        <p className="text-xs font-medium text-brand-muted mt-1">{description}</p>
       </div>
       <button
         type="button"
         onClick={onSubmit}
         disabled={saving}
-        className="bg-black hover:bg-brand-primary text-white hover:text-brand-text border-2 border-black px-5 py-2 text-[9px] font-black uppercase tracking-widest transition-colors shrink-0 disabled:opacity-50 flex items-center justify-center min-w-[110px]"
+        className="bg-brand-text text-brand-bg rounded-2xl px-5 py-3 font-bold text-xs hover:opacity-90 transition-all shrink-0 disabled:opacity-50 flex items-center justify-center min-w-[120px] shadow-sm"
       >
         {saving ? 'Saving...' : 'Save Section'}
       </button>
     </div>
-    <form onSubmit={onSubmit} className="border-t border-black/5 pt-6">
+    <form onSubmit={onSubmit} className="border-t border-brand-border/10 pt-6">
       {children}
     </form>
   </div>

@@ -99,7 +99,7 @@ const ApiKeys = () => {
   // Snippets definition
   const snippets = {
     js: `// Fetch form submissions via FormSpark Developer API
-fetch('https://api.formspark.io/v1/forms/YOUR_FORM_TOKEN/submissions', {
+fetch('${import.meta.env.VITE_SUPABASE_URL}/functions/v1/forms/YOUR_FORM_TOKEN/submissions', {
   method: 'GET',
   headers: {
     'Authorization': 'Bearer ${keyString || 'YOUR_API_KEY'}',
@@ -107,19 +107,18 @@ fetch('https://api.formspark.io/v1/forms/YOUR_FORM_TOKEN/submissions', {
   }
 })
 .then(res => res.json())
-.then(data => console.log(data))
 .catch(err => console.error(err));`,
 
     curl: `# Fetch form submissions using curl
 curl -X GET \\
-  "https://api.formspark.io/v1/forms/YOUR_FORM_TOKEN/submissions" \\
+  "${import.meta.env.VITE_SUPABASE_URL}/functions/v1/forms/YOUR_FORM_TOKEN/submissions" \\
   -H "Authorization: Bearer ${keyString || 'YOUR_API_KEY'}" \\
   -H "Content-Type: application/json"`,
 
     python: `# Fetch submissions using python requests library
 import requests
 
-url = "https://api.formspark.io/v1/forms/YOUR_FORM_TOKEN/submissions"
+url = "${import.meta.env.VITE_SUPABASE_URL}/functions/v1/forms/YOUR_FORM_TOKEN/submissions"
 headers = {
     "Authorization": "Bearer ${keyString || 'YOUR_API_KEY'}",
     "Content-Type": "application/json"
@@ -135,44 +134,47 @@ else:
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#F5F5F5]">
-        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent animate-spin"></div>
+      <div className="flex h-screen items-center justify-center bg-brand-bg text-brand-text transition-colors duration-500">
+        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent animate-spin rounded-full"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-[#F5F5F5] font-sans overflow-hidden">
-      <Sidebar />
+    <div className="flex flex-col lg:flex-row h-screen bg-brand-bg text-brand-text font-sans overflow-hidden transition-colors duration-500 relative">
+      {/* Dynamic Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-bg via-brand-bg to-brand-primary/10 pointer-events-none z-0"></div>
+
+      <Sidebar className="z-10 relative" />
       
-      <main className="flex-1 flex flex-col overflow-y-auto">
+      <main className="flex-1 flex flex-col overflow-y-auto relative z-10">
         {/* Header */}
-        <header className="h-20 bg-white border-b border-black/5 flex items-center justify-between px-6 md:px-10 shrink-0">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard" className="text-[11px] font-black uppercase text-black/40 hover:text-black transition-colors">Dashboard</Link>
-            <span className="text-black/20">/</span>
-            <span className="text-[11px] font-black uppercase tracking-widest text-brand-primary border-b-2 border-brand-primary pb-7 mt-7">
+        <header className="h-24 bg-brand-bg/60 backdrop-blur-xl border-b border-brand-border/10 flex items-center justify-between px-8 md:px-12 shrink-0 transition-colors duration-500 sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <Link to="/dashboard" className="text-xs font-semibold text-brand-muted hover:text-brand-text transition-colors">Dashboard</Link>
+            <span className="text-brand-muted/30">/</span>
+            <span className="text-xs font-bold text-brand-primary">
               API Tokens
             </span>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="p-6 md:p-10 max-w-4xl space-y-12">
+        <div className="p-8 md:p-12 max-w-4xl space-y-10 relative z-10 w-full">
           <div>
-            <h1 className="text-4xl font-black uppercase tracking-tighter">Developer Credentials</h1>
-            <p className="text-[13px] font-bold text-black/50 mt-1">Interact with your FormSpark forms, submissions, and settings programmatically using secret access tokens.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-brand-text bg-clip-text text-transparent bg-gradient-to-r from-brand-text to-brand-primary">Developer Credentials</h1>
+            <p className="text-sm font-medium text-brand-muted mt-2">Interact with your FormSpark forms, submissions, and settings programmatically using secret access tokens.</p>
           </div>
 
           {/* Core Key Panel */}
-          <div className="bg-white border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,1)] space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-brand-primary/10 border border-brand-primary text-brand-primary">
+          <div className="bg-brand-card/60 backdrop-blur-xl border border-brand-border/10 rounded-3xl p-8 shadow-sm space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-brand-primary/10 border border-brand-primary/20 text-brand-primary rounded-2xl">
                 <KeyIcon />
               </div>
               <div>
-                <h3 className="text-[11px] font-black uppercase tracking-widest">Secret Developer API Token</h3>
-                <p className="text-[9px] font-bold text-black/40 uppercase mt-0.5 tracking-wider">Keep this credential secret. Do not commit it to GitHub or client frontend code.</p>
+                <h3 className="text-lg font-bold tracking-tight text-brand-text">Secret Developer API Token</h3>
+                <p className="text-xs font-medium text-brand-muted mt-1">Keep this credential secret. Do not commit it to GitHub or client frontend code.</p>
               </div>
             </div>
 
@@ -181,22 +183,22 @@ else:
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1 relative">
                     <input 
-                      type={showKey ? "text" : "text"}
+                      type="text"
                       readOnly
-                      className="w-full bg-[#111] text-white border-2 border-black px-4 py-3 outline-none font-mono text-[10px] select-all"
+                      className="w-full bg-brand-bg/50 border border-brand-border/20 rounded-2xl px-5 py-4 outline-none font-mono text-xs text-brand-muted select-all"
                       value={showKey ? keyString : maskedKey}
                     />
                   </div>
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setShowKey(!showKey)}
-                      className="px-4 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider shrink-0"
+                      className="px-5 py-3.5 border border-brand-border/20 hover:bg-brand-text/5 text-brand-text font-bold text-xs rounded-2xl transition-all shrink-0"
                     >
                       {showKey ? 'Mask Key' : 'Reveal Key'}
                     </button>
                     <button 
                       onClick={() => copyToClipboard(keyString, 'API key copied!')}
-                      className="px-4 py-3 border-2 border-black hover:bg-black hover:text-white transition-colors text-[9px] font-black uppercase tracking-wider flex items-center gap-2 shrink-0"
+                      className="px-5 py-3.5 border border-brand-border/20 hover:bg-brand-text/5 text-brand-text font-bold text-xs rounded-2xl transition-all flex items-center gap-2 shrink-0"
                     >
                       <CopyIcon />
                       Copy Key
@@ -204,13 +206,13 @@ else:
                   </div>
                 </div>
 
-                <div className="pt-2 flex items-center justify-between border-t border-black/5">
-                  <p className="text-[9px] font-bold text-black/40 uppercase tracking-widest">Created: {new Date(apiKey.created_at).toLocaleDateString()}</p>
-                  <div className="flex gap-3">
+                <div className="pt-4 flex items-center justify-between border-t border-brand-border/10">
+                  <p className="text-xs font-semibold text-brand-muted">Created: {new Date(apiKey.created_at).toLocaleDateString()}</p>
+                  <div className="flex gap-4">
                     <button 
                       onClick={handleGenerate}
                       disabled={generating}
-                      className="text-[9px] font-black text-brand-primary uppercase hover:underline flex items-center gap-1.5"
+                      className="text-xs font-bold text-brand-primary hover:text-brand-primary/80 transition-all flex items-center gap-2"
                     >
                       <RefreshIcon />
                       {generating ? 'Regenerating...' : 'Regenerate API Key'}
@@ -218,7 +220,7 @@ else:
                     <button 
                       onClick={handleRevoke}
                       disabled={revoking}
-                      className="text-[9px] font-black text-red-500 uppercase hover:underline flex items-center gap-1.5"
+                      className="text-xs font-bold text-red-500 hover:text-red-500/80 transition-all flex items-center gap-2"
                     >
                       <TrashIcon />
                       {revoking ? 'Revoking...' : 'Revoke'}
@@ -227,12 +229,12 @@ else:
                 </div>
               </div>
             ) : (
-              <div className="text-center py-10 border-2 border-dashed border-black/10">
-                <p className="text-[10px] text-black/35 font-bold uppercase mb-6">No Developer API Key active for this account.</p>
+              <div className="text-center py-10 border border-dashed border-brand-border/20 rounded-3xl">
+                <p className="text-sm font-medium text-brand-muted mb-6">No Developer API Key active for this account.</p>
                 <button 
                   onClick={handleGenerate}
                   disabled={generating}
-                  className="bg-brand-primary text-brand-text border-2 border-black px-6 py-3 font-black uppercase tracking-widest text-[9px] hover:bg-[#e67c00] transition-colors shadow-[4px_4px_0_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                  className="bg-brand-primary text-brand-bg rounded-2xl px-6 py-3.5 font-bold text-xs hover:opacity-90 transition-all shadow-md"
                 >
                   {generating ? 'Generating...' : 'Generate Secret Developer Key'}
                 </button>
@@ -241,19 +243,19 @@ else:
           </div>
 
           {/* Documentation Guides */}
-          <div className="bg-[#111] border-4 border-black p-8 shadow-[8px_8px_0_rgba(0,0,0,1)] text-white space-y-6">
+          <div className="bg-brand-card/60 backdrop-blur-xl border border-brand-border/10 rounded-3xl p-8 shadow-sm space-y-6">
             <div>
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary">API Integration Guide</h3>
-              <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest mt-1">Authenticate requests by passing your token inside the HTTP Headers authorization block.</p>
+              <h3 className="text-lg font-bold tracking-tight text-brand-primary">API Integration Guide</h3>
+              <p className="text-xs font-medium text-brand-muted mt-1">Authenticate requests by passing your token inside the HTTP Headers authorization block.</p>
             </div>
 
             {/* Language Switch Tabs */}
-            <div className="flex border-b border-white/10">
+            <div className="flex border-b border-brand-border/10">
               <button 
                 type="button"
                 onClick={() => setDocLanguage('js')}
-                className={`px-4 py-2.5 text-[9px] font-black uppercase tracking-widest transition-all ${
-                  docLanguage === 'js' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-white/45 hover:text-white'
+                className={`px-4 py-3 text-xs font-bold transition-all ${
+                  docLanguage === 'js' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-brand-muted hover:text-brand-text'
                 }`}
               >
                 JavaScript / Node
@@ -261,8 +263,8 @@ else:
               <button 
                 type="button"
                 onClick={() => setDocLanguage('curl')}
-                className={`px-4 py-2.5 text-[9px] font-black uppercase tracking-widest transition-all ${
-                  docLanguage === 'curl' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-white/45 hover:text-white'
+                className={`px-4 py-3 text-xs font-bold transition-all ${
+                  docLanguage === 'curl' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-brand-muted hover:text-brand-text'
                 }`}
               >
                 cURL Command
@@ -270,8 +272,8 @@ else:
               <button 
                 type="button"
                 onClick={() => setDocLanguage('python')}
-                className={`px-4 py-2.5 text-[9px] font-black uppercase tracking-widest transition-all ${
-                  docLanguage === 'python' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-white/45 hover:text-white'
+                className={`px-4 py-3 text-xs font-bold transition-all ${
+                  docLanguage === 'python' ? 'border-b-2 border-brand-primary text-brand-primary' : 'text-brand-muted hover:text-brand-text'
                 }`}
               >
                 Python Request
@@ -280,18 +282,18 @@ else:
 
             {/* Snippet Block */}
             <div className="relative">
-              <pre className="bg-[#0a0a0a] border border-white/5 p-5 font-mono text-[9px] text-white/80 overflow-x-auto leading-relaxed max-w-full">
+              <pre className="bg-brand-bg/85 border border-brand-border/15 rounded-2xl p-5 font-mono text-xs text-brand-muted overflow-x-auto leading-relaxed max-w-full">
                 {snippets[docLanguage]}
               </pre>
               <button 
                 onClick={() => copyToClipboard(snippets[docLanguage], 'Snippet copied!')}
-                className="absolute top-3 right-3 bg-brand-primary text-brand-text border border-black px-3 py-1.5 text-[8px] font-black uppercase tracking-widest hover:bg-[#e67c00] transition-colors"
+                className="absolute top-3 right-3 bg-brand-primary text-brand-bg rounded-xl px-3.5 py-2 text-xs font-bold hover:opacity-90 transition-all shadow-md"
               >
                 Copy snippet
               </button>
             </div>
 
-            <div className="pt-2 text-[8px] font-bold text-white/30 uppercase tracking-widest leading-relaxed">
+            <div className="text-xs font-medium text-brand-muted leading-relaxed">
               Note: Replace YOUR_FORM_TOKEN with the unique form token found inside the Form overview page.
             </div>
           </div>

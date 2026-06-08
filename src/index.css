@@ -9,6 +9,10 @@ html {
   --color-brand-primary: var(--color-brand-primary);
   --color-brand-text: var(--color-brand-text);
   --color-brand-border: var(--color-brand-border);
+  --color-brand-card: var(--color-brand-card);
+  --color-brand-shadow: var(--color-brand-shadow);
+  --color-brand-muted: var(--color-brand-muted);
+  --color-brand-light-bg: var(--color-brand-light-bg);
 
   --font-sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-display: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -20,6 +24,10 @@ html {
     --color-brand-primary: #FF8A00;
     --color-brand-text: #111111;
     --color-brand-border: #111111;
+    --color-brand-card: #FFFFFF;
+    --color-brand-shadow: #111111;
+    --color-brand-muted: rgba(17, 17, 17, 0.5);
+    --color-brand-light-bg: #FAF9F5;
   }
 
   .dark {
@@ -27,6 +35,10 @@ html {
     --color-brand-primary: #FF8A00;
     --color-brand-text: #F4F4F0;
     --color-brand-border: #444444;
+    --color-brand-card: #181818;
+    --color-brand-shadow: #FF8A00;
+    --color-brand-muted: rgba(244, 244, 240, 0.5);
+    --color-brand-light-bg: #222222;
   }
 
   body {
